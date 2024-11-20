@@ -1,19 +1,30 @@
+import { COLORS } from "./src/constants/colors.constants";
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
+    darkMode: ["class"],
+		mode: 'jit',
+    content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+  	extend: {
+			fontFamily: {
+        'cursive' : ['Allura', 'cursive'],
       },
-    },
+  		colors: COLORS,
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
+  		},
+			backgroundImage: {
+        'auth-pattern': "url('/assets/bg/bg-auth.jpg')"
+      }
+  	}
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
 export default config;
