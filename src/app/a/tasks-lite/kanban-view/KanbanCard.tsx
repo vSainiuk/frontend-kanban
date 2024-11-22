@@ -63,13 +63,32 @@ export default function KanbanCard({
 		transform,
 		transition,
 		isDragging,
-	} = useSortable({ id, data: { type: 'task' } })
+	} = useSortable({ id, data: { type: 'Task', task } })
 
 	const [isOpenMarkdownDialog, setIsOpenMarkdownDialog] = useState(false)
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
+	}
+
+	if (isDragging) {
+		return (
+			<div className='relative w-[330px] h-[100px]'>
+				<motion.div
+					style={style}
+					ref={setNodeRef}
+					{...listeners}
+					{...attributes}
+					className={cn(
+						'h-full w-full border border-purple-700/50',
+						'grid grid-cols-[auto_30px] bg-card items-center gap-1 rounded-2xl p-4 shadow-md transition-shadow relative',
+						isDragging ? 'opacity-50' : '',
+						watch('isCompleted') && 'line-through text-gray-400'
+					)}
+				></motion.div>
+			</div>
+		)
 	}
 
 	return (
