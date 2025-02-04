@@ -75,7 +75,6 @@ export default function MarkdownEditor({
 				hooks={
 					isCompletedTask ? undefined : { addImageBlobHook: handleImageUpload }
 				}
-				toolbarItems={isCompletedTask ? [] : undefined}
 			/>
 		</div>
 	)

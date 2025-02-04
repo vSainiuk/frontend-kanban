@@ -8,6 +8,8 @@ export async function middleware(request: NextRequest, response: NextResponse) {
 
 	const isAuthPage = url.includes('/auth')
 
+	console.log(refreshToken, isAuthPage)
+
 	if (refreshToken && isAuthPage) {
 		/// If the user is logged in and tries to access the auth page, redirect to the home page
 		return NextResponse.redirect(new URL(DASHBOARD_PAGES.HOME, url))

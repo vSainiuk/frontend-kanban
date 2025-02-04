@@ -32,8 +32,8 @@ import { AnimatePresence } from 'framer-motion'
 import debounce from 'lodash.debounce'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useColumns } from '../../tasks/hooks/useColumns'
-import { useTasks } from '../../tasks/hooks/useTasks'
+import { useColumns } from '../hooks/useColumns'
+import { useTasks } from '../hooks/useTasks'
 import KanbanAddNewItem from './KanbanAddNewItem'
 import KanbanCard from './KanbanCard'
 import KanbanColumn from './KanbanColumn'
@@ -54,16 +54,13 @@ const KanbanView = React.memo(
 
 		useEffect(() => {
 			if (data) {
-				const groupedTasks = data.reduce(
-					(acc: TasksByColumn, task: Task) => {
-						if (!acc[task.columnId]) {
-							acc[task.columnId] = []
-						}
-						acc[task.columnId].push(task)
-						return acc
-					},
-					{}
-				)
+				const groupedTasks = data.reduce((acc: TasksByColumn, task: Task) => {
+					if (!acc[task.columnId]) {
+						acc[task.columnId] = []
+					}
+					acc[task.columnId].push(task)
+					return acc
+				}, {})
 
 				setTasks(groupedTasks)
 			}

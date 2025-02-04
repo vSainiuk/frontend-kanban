@@ -1,4 +1,4 @@
-import { useUpdateTask } from '@/app/a/tasks/hooks/useUpdateTask'
+import { useUpdateTask } from '@/app/a/tasks-lite/hooks/useUpdateTask'
 import {
 	Dialog,
 	DialogContent,
@@ -30,7 +30,9 @@ export default function DayPicker({
 	isCompletedTask,
 }: DayPickerProps) {
 	const { updateTask } = useUpdateTask()
-	const [selectedDate, setSelectedDate] = useState<Date | null>(value ? dayjs(value).toDate() : null)
+	const [selectedDate, setSelectedDate] = useState<Date | null>(
+		value ? dayjs(value).toDate() : null
+	)
 	const { isShow, setIsShow, ref } = useOutside(false)
 
 	const handleDaySelect = (date: Date | undefined) => {

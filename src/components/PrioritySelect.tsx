@@ -1,4 +1,4 @@
-import { useUpdateTask } from '@/app/a/tasks/hooks/useUpdateTask'
+import { useUpdateTask } from '@/app/a/tasks-lite/hooks/useUpdateTask'
 import { cn } from '@/lib/utils'
 import { TaskPriority } from '@/types/task.types'
 import Badge from './ui/badge'

@@ -32,10 +32,10 @@ import { motion } from 'framer-motion'
 import { BookOpen, CircleCheck, GripVertical, Trash2 } from 'lucide-react'
 import { memo, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useCreateTask } from '../../tasks/hooks/useCreateTask'
-import { useDeleteTask } from '../../tasks/hooks/useDeleteTask'
-import { useTaskDebounce } from '../../tasks/hooks/useTaskDebounce'
-import { useUpdateTask } from '../../tasks/hooks/useUpdateTask'
+import { useCreateTask } from '../hooks/useCreateTask'
+import { useDeleteTask } from '../hooks/useDeleteTask'
+import { useTaskDebounce } from '../hooks/useTaskDebounce'
+import { useUpdateTask } from '../hooks/useUpdateTask'
 
 interface KanbanCardProps {
 	id: UniqueIdentifier
