@@ -10,7 +10,6 @@ export function useTasks() {
 		queryKey: ['tasks'],
 		queryFn: () => taskService.getTasks(),
 	})
-
 	const [tasks, setTasks] = useState<Task[] | undefined>(data?.data)
 
 	useEffect(() => {

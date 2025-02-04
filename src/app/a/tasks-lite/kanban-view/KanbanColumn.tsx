@@ -1,24 +1,48 @@
+'use client'
+
+import { Button } from '@/components/ui/button'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog'
+import DialogTemplate from '@/components/ui/dialog-template'
 import { cn } from '@/lib/utils'
+import { columnService } from '@/services/column.service'
 import { Column } from '@/types/column.types'
+import { Task } from '@/types/task.types'
 import { UniqueIdentifier } from '@dnd-kit/core'
-import { useSortable } from '@dnd-kit/sortable'
+import {
+	rectSwappingStrategy,
+	SortableContext,
+	useSortable,
+} from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { motion } from 'framer-motion'
-import { GripHorizontal, Trash2 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Edit2, GripHorizontal, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import KanbanAddNewCard from './KanbanAddNewItem'
+import KanbanCard from './KanbanCard'
 
 interface KanbanColumnProps {
 	column: Column
-	children: React.ReactNode
+	setColumns: React.Dispatch<React.SetStateAction<Column[] | undefined>>
 	onAddTask: (columnId: UniqueIdentifier) => void
+	onDeleteTask: (task: Task) => void
 	onDeleteColumn: (columnId: UniqueIdentifier) => void
+	tasks: Task[]
 }
 
 export default function KanbanColumn({
 	column,
-	children,
+	setColumns,
 	onAddTask,
+	onDeleteTask,
 	onDeleteColumn,
+	tasks,
 }: KanbanColumnProps) {
 	const { id, label } = column
 	const {
@@ -36,9 +60,32 @@ export default function KanbanColumn({
 		},
 	})
 
+	const tasksIds = useMemo(() => tasks?.map(task => task.id), [tasks])
+
 	const style = {
 		transform: CSS.Translate.toString(transform),
 		transition,
+	}
+
+	const [isCreateTaskFinished, setIsCreateTaskFinished] =
+		useState<boolean>(false)
+	const [isEditColumnNameOpen, setIsEditColumnNameOpen] =
+		useState<boolean>(false)
+	const [newEditColumnName, setNewEditColumnName] = useState<string>(label)
+
+	const handleEditColumnName = () => {
+		setIsEditColumnNameOpen(false)
+
+		const trimmedName = newEditColumnName.trim()
+
+		if (!trimmedName || trimmedName === label) return
+
+		columnService.updateColumn(id, { label: trimmedName }).then(() => {
+			setNewEditColumnName(trimmedName)
+			setColumns(prev =>
+				prev?.map(col => (col.id === id ? { ...col, label: trimmedName } : col))
+			)
+		})
 	}
 
 	return (
@@ -54,27 +101,91 @@ export default function KanbanColumn({
 		>
 			<div className={cn('mb-4 p-2', isDragging && 'opacity-50')}>
 				<div className='flex items-center justify-between border-b-2 border-border mb-2'>
-					<h2 className='text-xl italic'>{label}</h2>
+					<h2 className='text-xl italic text-ellipsis max-w-[75%] overflow-hidden'>
+						{label}
+					</h2>
+
 					<div className='flex gap-1 items-center'>
+						<DialogTemplate
+							open={isEditColumnNameOpen}
+							setOpen={setIsEditColumnNameOpen}
+							title='Edit column name'
+							btnText='Save'
+							onClick={handleEditColumnName}
+							inputProps={{
+								value: newEditColumnName,
+								onChange: setNewEditColumnName,
+							}}
+						>
+							<Edit2 className='w-4 h-4 transition-colors text-muted hover:text-white' />
+						</DialogTemplate>
+
 						<button className='w-fit' aria-describedby='todo-item'>
 							<GripHorizontal className='hover:text-muted' />
 						</button>
-						<button className='' onClick={() => onDeleteColumn(id)}>
-							<Trash2 className='w-4 h-4 transition-colors text-muted hover:text-destructive' />
-						</button>
+
+						{tasks.length > 0 ? (
+							<Dialog>
+								<DialogTrigger asChild>
+									<Trash2 className='w-4 h-4 transition-colors text-muted hover:text-destructive' />
+								</DialogTrigger>
+								<DialogContent
+									aria-describedby='modal-content'
+									className='sm:max-w-[425px]'
+								>
+									<DialogHeader>
+										<DialogTitle>Are you sure?</DialogTitle>
+									</DialogHeader>
+									<DialogDescription>
+										Are you sure you want to delete this column? All tasks in
+										this column will be deleted permanently.
+									</DialogDescription>
+
+									<Button
+										variant='destructive'
+										onClick={() => onDeleteColumn(id)}
+									>
+										Delete
+									</Button>
+								</DialogContent>
+							</Dialog>
+						) : (
+							<Trash2
+								onClick={() => onDeleteColumn(id)}
+								className='w-4 h-4 transition-colors text-muted hover:text-destructive'
+							/>
+						)}
 					</div>
 				</div>
 
-				<div className='flex flex-col gap-2'>{children}</div>
+				<div className='flex flex-col gap-2'>
+					<SortableContext strategy={rectSwappingStrategy} items={tasksIds}>
+						<AnimatePresence>
+							{tasks &&
+								tasks.map(task => (
+									<KanbanCard
+										key={task.id}
+										id={task.id}
+										task={task}
+										onDeleteTask={onDeleteTask}
+										isCreateTaskFinished={isCreateTaskFinished}
+										setIsCreateTaskFinished={setIsCreateTaskFinished}
+									/>
+								))}
+						</AnimatePresence>
+					</SortableContext>
+				</div>
 
-				<KanbanAddNewCard
-					columnId={id}
-					onClick={() => {
-						onAddTask(id)
-					}}
-				>
-					Add task...
-				</KanbanAddNewCard>
+				{
+					<KanbanAddNewCard
+						columnId={id}
+						onClick={() => {
+							onAddTask(id)
+						}}
+					>
+						Add task...
+					</KanbanAddNewCard>
+				}
 			</div>
 		</motion.div>
 	)

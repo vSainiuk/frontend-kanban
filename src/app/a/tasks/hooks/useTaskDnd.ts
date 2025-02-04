@@ -10,7 +10,6 @@ import { useUpdateTasks } from './useUpdateTasks'
 export function useTaskDnd() {
 	const { updateTask } = useUpdateTask()
 	const { updateTasks } = useUpdateTasks()
-	const { items, setItems } = useTasks()
 
 	const onDragEnd = (result: DropResult) => {
 		const { source, destination } = result
@@ -24,9 +23,6 @@ export function useTaskDnd() {
 				startIndex: source.index,
 				endIndex: destination.index,
 			})
-
-			console.log('items:', items)
-			console.log('newItems:', newItems)
 
 			setItems(newItems)
 			updateTasks({

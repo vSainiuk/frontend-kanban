@@ -1,43 +1,82 @@
+'use client'
+
+import '@toast-ui/editor/dist/theme/toastui-editor-dark.css'
 import '@toast-ui/editor/dist/toastui-editor.css'
-import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
 
 import { Editor } from '@toast-ui/react-editor'
-import { useRef, useState } from 'react'
-import { Button } from './ui/button'
+import debounce from 'lodash.debounce'
+import { useCallback, useRef } from 'react'
+
+interface MarkdownEditorProps {
+	title: string
+	description?: string
+	setDescription: (description: string) => void
+	isCompletedTask?: boolean
+}
 
 export default function MarkdownEditor({
-	title
-}: { title: string }) {
+	title,
+	description,
+	setDescription,
+	isCompletedTask,
+}: MarkdownEditorProps) {
 	const editorRef = useRef<Editor | null>(null)
-	const [content, setContent] = useState<string>('')
 
-	console.log('content', content)
+	const debouncedContentChange = useCallback(
+		debounce((markdown: string) => {
+			setDescription(markdown)
+		}, 500),
+		[]
+	)
 
 	const handleContentChange = () => {
+		if (isCompletedTask) return
+
 		const editorInstance = editorRef.current?.getInstance()
 		const markdown = editorInstance.getMarkdown()
-		setContent(markdown)
+		debouncedContentChange(markdown)
 	}
 
-	const handleSave = () => {
-		console.log('Saved Content:', content)
+	const handleImageUpload = async (
+		blob: File,
+		callback: (url: string, altText?: string) => void
+	) => {
+		try {
+			const formData = new FormData()
+			formData.append('file', blob)
+
+			const response = await fetch('http://localhost:4200/api/upload', {
+				method: 'POST',
+				body: formData,
+			})
+
+			const data = await response.json()
+			if (data.url) {
+				callback(data.url, blob.name)
+			}
+		} catch (error) {
+			console.error('Image upload failed:', error)
+		}
 	}
 
 	return (
-		<div className='pointer-events-auto z-50'>
+		<div className='z-50' data-no-dnd>
 			<Editor
 				ref={editorRef}
 				height='500px'
 				theme='dark'
-				initialEditType='wysiwyg'
+				initialEditType={'wysiwyg'}
 				previewStyle='vertical'
-				initialValue={title}
-				placeholder='А чо писати то...'
-				onChange={handleContentChange}
+				initialValue={description ? description : title}
+				value={description ? description : title}
+				placeholder='Write something...'
+				onChange={isCompletedTask ? undefined : handleContentChange}
+				usageStatistics={false}
+				hooks={
+					isCompletedTask ? undefined : { addImageBlobHook: handleImageUpload }
+				}
+				toolbarItems={isCompletedTask ? [] : undefined}
 			/>
-			<Button onClick={handleSave} style={{ marginTop: '10px' }}>
-				Save Content
-			</Button>
 		</div>
 	)
 }

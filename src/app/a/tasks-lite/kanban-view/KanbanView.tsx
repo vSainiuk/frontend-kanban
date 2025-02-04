@@ -1,20 +1,14 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import DialogTemplate from '@/components/ui/dialog-template'
 import Loader from '@/components/ui/loader'
 import { HEIGHT } from '@/constants/height-elements.constants'
-import { useHorizontalScroll } from '@/hooks/useHorizontalScroll'
-import { Column } from '@/types/column.types'
-import { Task } from '@/types/task.types'
+import { useMarkdownContext } from '@/contexts/MarkdownContext'
+import { columnService } from '@/services/column.service'
+import { taskService } from '@/services/task.service'
+import { OrderItemsDto } from '@/types/orderItemsDto'
+import { Task, TasksByColumn } from '@/types/task.types'
+import createOrderedItems from '@/utils/createOrderedItems'
 import {
 	closestCorners,
 	DndContext,
@@ -22,7 +16,6 @@ import {
 	DragOverEvent,
 	DragOverlay,
 	DragStartEvent,
-	KeyboardSensor,
 	MouseSensor,
 	TouchSensor,
 	UniqueIdentifier,
@@ -33,31 +26,56 @@ import {
 	arrayMove,
 	rectSwappingStrategy,
 	SortableContext,
-	sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable'
 import cuid from 'cuid'
 import { AnimatePresence } from 'framer-motion'
-import React, { useMemo, useState } from 'react'
+import debounce from 'lodash.debounce'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useColumns } from '../../tasks/hooks/useColumns'
+import { useTasks } from '../../tasks/hooks/useTasks'
 import KanbanAddNewItem from './KanbanAddNewItem'
 import KanbanCard from './KanbanCard'
 import KanbanColumn from './KanbanColumn'
 
 const KanbanView = React.memo(
 	function KanbanView() {
+		const { isMarkdownOpen } = useMarkdownContext()
 		const { columns, setColumns } = useColumns()
-		const [activeColumn, setActiveColumn] = useState<Column | null>(null)
+		const { tasks: data } = useTasks()
+		const [tasks, setTasks] = useState<TasksByColumn>({})
 		const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+		const debouncedUpdateTasksRef = useRef(
+			debounce((updatedTasks: OrderItemsDto[]) => {
+				taskService.moveTasks(updatedTasks)
+			}, 1000)
+		).current
+
+		useEffect(() => {
+			if (data) {
+				const groupedTasks = data.reduce(
+					(acc: TasksByColumn, task: Task) => {
+						if (!acc[task.columnId]) {
+							acc[task.columnId] = []
+						}
+						acc[task.columnId].push(task)
+						return acc
+					},
+					{}
+				)
+
+				setTasks(groupedTasks)
+			}
+		}, [data])
+
 		const columnsIds = useMemo(
 			() => columns?.map(column => column.id),
 			[columns]
 		)
 
-		console.log('columns', columns)
-
-		const { containerRef, handleMouseMove, setIsHoveringScrollbar } =
-			useHorizontalScroll()
+		// const { containerRef, handleMouseMove, setIsHoveringScrollbar } =  ///TODO: How to optimize this?
+		// 	useHorizontalScroll()
 
 		// DND STATE Region start
 		const [columnName, setColumnName] = useState<string>('')
@@ -65,32 +83,33 @@ const KanbanView = React.memo(
 		// DND STATE Region end
 
 		// DND HANDLERS Region start
-		const sensors = useSensors(
-			useSensor(MouseSensor, {
-				activationConstraint: {
-					distance: 2,
-				},
-			}),
-			useSensor(TouchSensor, {
-				activationConstraint: {
-					delay: 200,
-					tolerance: 6,
-				},
-			}),
-			useSensor(KeyboardSensor, {
-				coordinateGetter: sortableKeyboardCoordinates,
-			})
-		)
+		const mouseSensor = useSensor(MouseSensor, {
+			activationConstraint: {
+				distance: 2,
+			},
+		})
 
-		function findColumnByType(id: UniqueIdentifier | undefined, type: string) {
-			if (type === 'column') {
-				return columns.find(column => column.id === id)
-			}
+		const touchSensor = useSensor(TouchSensor, {
+			activationConstraint: {
+				delay: 200,
+				tolerance: 6,
+			},
+		})
 
-			if (type === 'task') {
-				return columns.find(column => column.tasks.find(task => task.id === id))
+		const customSensors = useSensors(mouseSensor, touchSensor)
+
+		const handlePointerDown = (event: any) => {
+			if (event.target.closest('[data-no-dnd]')) {
+				event.stopPropagation()
 			}
 		}
+
+		useEffect(() => {
+			document.addEventListener('pointerdown', handlePointerDown)
+			return () => {
+				document.removeEventListener('pointerdown', handlePointerDown)
+			}
+		}, [])
 
 		function onAddColumn() {
 			if (!columnName) return
@@ -102,56 +121,67 @@ const KanbanView = React.memo(
 				tasks: [],
 			}
 
-			setColumns(prev => (prev ? [...prev, newColumn] : [newColumn]))
-			setColumnName('')
-			setShowAddColumnModal(false)
-		}
-		function onDeleteColumn(columnId: UniqueIdentifier) {
-			setColumns(
-				prevColumns =>
-					prevColumns && prevColumns.filter(column => column.id !== columnId)
-			)
-		}
-		function onAddTask(columnId: UniqueIdentifier) {
-			setColumns(prevColumns => {
-				if (!prevColumns) return prevColumns
-				return prevColumns.map(column =>
-					column.id === columnId
-						? {
-								...column,
-								tasks: [
-									...column.tasks,
-									{
-										id: `task-${cuid()}`,
-										title: '',
-										isCompleted: false,
-										order: column.tasks.length,
-										columnId: column.id,
-									},
-								],
-							}
-						: column
+			columnService.createColumn(newColumn).then(createdColumn => {
+				setColumns(prev =>
+					prev ? [...prev, createdColumn.data] : [createdColumn.data]
 				)
+				setTasks(prev => ({ ...prev, [createdColumn.data.id]: [] }))
+				setColumnName('')
+				setShowAddColumnModal(false)
 			})
 		}
 
-		function onDeleteTask(taskId: UniqueIdentifier) {
-			setColumns(
-				prevColumns =>
-					prevColumns &&
-					prevColumns.map(column => ({
-						...column,
-						tasks: column.tasks.filter(task => task.id !== taskId),
-					}))
-			)
+		function onDeleteColumn(columnId: UniqueIdentifier) {
+			columnService
+				.deleteColumn(columnId)
+				.then(() => {
+					setColumns(prevColumns => {
+						if (!prevColumns) return prevColumns
+
+						const updatedColumns = prevColumns.filter(
+							column => column.id !== columnId
+						)
+
+						const newTasks = Object.fromEntries(
+							Object.entries(tasks).filter(([key]) => key !== columnId)
+						)
+						setTasks(newTasks)
+
+						const orderedColumnsToBD = createOrderedItems(updatedColumns)
+
+						columnService.moveColumns(orderedColumnsToBD)
+
+						return updatedColumns
+					})
+				})
+				.catch(error => {
+					console.error('Error deleting column:', error)
+				})
+		}
+
+		function onAddTask(columnId: UniqueIdentifier) {
+			const newTask: Task = {
+				id: `task-${cuid()}`,
+				columnId: columnId as string,
+				isCompleted: false,
+				title: '',
+				order: tasks[columnId as string]?.length || 0,
+			}
+
+			setTasks(prev => ({
+				...prev,
+				[columnId]: [...(prev[columnId] || []), newTask],
+			}))
+		}
+
+		function onDeleteTask({ id, columnId }: Task) {
+			setTasks(prev => ({
+				...prev,
+				[columnId]: prev[columnId].filter(task => task.id !== id),
+			}))
 		}
 
 		function onDragStart(event: DragStartEvent) {
-			if (event.active.data.current?.type === 'Column') {
-				setActiveColumn(event.active.data.current.column)
-				return
-			}
-
 			if (event.active.data.current?.type === 'Task') {
 				setActiveTask(event.active.data.current.task)
 				return
@@ -159,150 +189,161 @@ const KanbanView = React.memo(
 		}
 
 		function onDragOver(event: DragOverEvent) {
-			const { active, over } = event;
-	
-			if (!over || active.id === over.id) return;
-	
-			const activeId = active.id;
-			const overId = over.id;
-	
-			const isActiveTask = active.data.current?.type === 'Task';
-			const isOverTask = over.data.current?.type === 'Task';
+			const { active, over } = event
 
-			if(!isActiveTask) return
-	
-			// Dropping task over another task
-			if (isActiveTask && isOverTask) {
-					setColumns(prevColumns => {
-							if (!prevColumns) return prevColumns;
-	
-							const activeColumn = prevColumns.find(column =>
-									column.tasks.some(task => task.id === activeId)
-							);
-	
-							if (!activeColumn) return prevColumns;
-	
-							const activeTaskIndex = activeColumn.tasks.findIndex(
-									task => task.id === activeId
-							);
-	
-							if (activeTaskIndex === -1) return prevColumns;
-	
-							const activeTask = activeColumn.tasks[activeTaskIndex];
-	
-							// Найти целевую колонку и задание, над которым происходит перетаскивание
-							const overColumn = prevColumns.find(column =>
-									column.tasks.some(task => task.id === overId)
-							);
-	
-							if (!overColumn) return prevColumns;
-	
-							const overTaskIndex = overColumn.tasks.findIndex(
-									task => task.id === overId
-							);
-	
-							if (overTaskIndex === -1) return prevColumns;
-	
-							// Если активное задание и целевая колонка совпадают, только меняем порядок
-							if (activeColumn.id === overColumn.id) {
-									const updatedTasks = arrayMove(
-											activeColumn.tasks,
-											activeTaskIndex,
-											overTaskIndex
-									);
-	
-									return prevColumns.map(column =>
-											column.id === activeColumn.id
-													? { ...column, tasks: updatedTasks }
-													: column
-									);
-							}
-	
-							// Если колонки разные: удаляем из исходной, добавляем в целевую
-							const updatedActiveColumn = {
-									...activeColumn,
-									tasks: activeColumn.tasks.filter(task => task.id !== activeId),
-							};
-	
-							const updatedOverColumn = {
-									...overColumn,
-									tasks: [
-											...overColumn.tasks.slice(0, overTaskIndex),
-											activeTask,
-											...overColumn.tasks.slice(overTaskIndex),
-									],
-							};
-	
-							return prevColumns.map(column => {
-									if (column.id === updatedActiveColumn.id) return updatedActiveColumn;
-									if (column.id === updatedOverColumn.id) return updatedOverColumn;
-									return column;
-							});
-					});
+			if (!over || active.id === over.id) return
+
+			const activeId = active.id
+			const overId = over.id
+			const isActiveTask = active.data.current?.type === 'Task'
+			const isOverTask = over.data.current?.type === 'Task'
+			const isOverColumn = over.data.current?.type === 'Column'
+
+			if (!isActiveTask) return
+
+			const activeColumnId = active.data.current?.task.columnId
+			const overColumnId = isOverTask
+				? over.data.current?.task.columnId
+				: isOverColumn
+					? overId
+					: null
+
+			// Dropping a task over another task in the same column
+			if (isActiveTask && isOverTask && activeColumnId === overColumnId) {
+				setTasks(prevTasks => {
+					if (!prevTasks) return prevTasks
+
+					const activeIndex = prevTasks[activeColumnId].findIndex(
+						t => t.id === activeId
+					)
+					const overIndex = prevTasks[overColumnId].findIndex(
+						t => t.id === overId
+					)
+
+					const result = arrayMove(
+						prevTasks[activeColumnId],
+						activeIndex,
+						overIndex
+					)
+
+					const newTasks = createOrderedItems(result)
+					debouncedUpdateTasksRef(newTasks)
+
+					return {
+						...prevTasks,
+						[activeColumnId]: result,
+					}
+				})
+			} else {
+				// Dropping a task over a task in a different column
+				setTasks(prevTasks => {
+					const activeTasks = [...(prevTasks[activeColumnId] || [])]
+					const overTasks = [...(prevTasks[overColumnId] || [])]
+
+					console.log('activeTasks', activeTasks)
+					console.log('overTasks', overTasks)
+
+					const activeIndex = activeTasks.findIndex(
+						task => task.id === activeId
+					)
+
+					console.log('activeIndex', activeIndex)
+
+					if (activeIndex === -1) return prevTasks
+
+					const [movedTask] = activeTasks.splice(activeIndex, 1)
+
+					const isOverLastTask =
+						overTasks.length > 0 &&
+						overTasks[overTasks.length - 1].id === overId
+
+					console.log('isOverLastTask', isOverLastTask)
+
+					const overIndex = isOverLastTask
+						? overTasks.length
+						: overTasks.findIndex(task => task.id === overId)
+
+					const updatedOverTasks = [
+						...overTasks.slice(0, overIndex),
+						{ ...movedTask, columnId: overColumnId },
+						...overTasks.slice(overIndex),
+					]
+
+					const orderedActiveTasks = createOrderedItems(activeTasks)
+					const orderedOverTasks = createOrderedItems(updatedOverTasks)
+
+					debouncedUpdateTasksRef([...orderedActiveTasks, ...orderedOverTasks])
+					taskService.updateTask(activeId as string, { columnId: overColumnId })
+
+					return {
+						...prevTasks,
+						[activeColumnId]: activeTasks,
+						[overColumnId]: updatedOverTasks,
+					}
+				})
 			}
 
-			// Dropping task over a column
-			const isOverColumn = over.data.current?.type === 'Column';
+			// Dropping a task over a column
+			if (isActiveTask && isOverColumn) {
+				setTasks(prevTasks => {
+					if (!prevTasks) return prevTasks
 
-			if(isActiveTask && isOverColumn) {
-				setColumns(prevColumns => {
-					if (!prevColumns) return prevColumns;
-	
-					const activeColumn = prevColumns.find(column =>
-							column.tasks.some(task => task.id === activeId)
-					);
-	
-					if (!activeColumn) return prevColumns;
-	
-					const activeTaskIndex = activeColumn.tasks.findIndex(
-							task => task.id === activeId
-					);
-	
-					const activeTask = activeColumn.tasks[activeTaskIndex];
-	
-					const updatedActiveColumn = {
-							...activeColumn,
-							tasks: activeColumn.tasks.filter(task => task.id !== activeId),
-					};
-	
-					const updatedOverColumn = {
-							...over.data.current?.column,
-							tasks: [...over.data.current?.column.tasks, activeTask],
-					};
-	
-					return prevColumns.map(column => {
-							if (column.id === updatedActiveColumn.id) return updatedActiveColumn;
-							if (column.id === updatedOverColumn.id) return updatedOverColumn;
-							return column;
-					});
-				});
+					const activeIndex = prevTasks[activeColumnId].findIndex(
+						t => t.id === activeId
+					)
+
+					const result = arrayMove(
+						prevTasks[activeColumnId],
+						activeIndex,
+						prevTasks[overColumnId].length
+					)
+
+					return {
+						...prevTasks,
+						[activeColumnId]: result,
+					}
+				})
 			}
 		}
-	
+
 		function onDragEnd(event: DragEndEvent) {
-			setActiveColumn(null)
 			setActiveTask(null)
 			const { active, over } = event
 
 			if (!over) return
+
+			const isActiveColumn = active.data.current?.type === 'Column'
+			const isOverColumn = over.data.current?.type === 'Column'
 
 			const activeColumnId = active.id
 			const overColumnId = over.id
 
 			if (activeColumnId === overColumnId) return
 
-			setColumns(prevColumns => {
-				if (!prevColumns) return prevColumns
-				const activeColumnIndex = prevColumns?.findIndex(
-					column => column.id === activeColumnId
-				)
+			if (isActiveColumn && isOverColumn) {
+				setColumns(prevColumns => {
+					if (!prevColumns) return prevColumns
+					const activeColumnIndex = prevColumns?.findIndex(
+						column => column.id === activeColumnId
+					)
 
-				const overColumnIndex = prevColumns?.findIndex(
-					column => column.id === overColumnId
-				)
+					const overColumnIndex = prevColumns?.findIndex(
+						column => column.id === overColumnId
+					)
 
-				return arrayMove(prevColumns, activeColumnIndex, overColumnIndex)
-			})
+					const result = arrayMove(
+						prevColumns,
+						activeColumnIndex,
+						overColumnIndex
+					)
+
+					const newColumns = createOrderedItems(result)
+
+					columnService.moveColumns(newColumns)
+
+					return result
+				})
+			}
 		}
 		// DND HANDLERS Region end
 
@@ -310,9 +351,9 @@ const KanbanView = React.memo(
 
 		return (
 			<div
-				ref={containerRef}
-				onMouseMove={handleMouseMove}
-				onMouseLeave={() => setIsHoveringScrollbar(false)}
+				// ref={containerRef}
+				// onMouseMove={handleMouseMove}
+				// onMouseLeave={() => setIsHoveringScrollbar(false)}
 				className='grid gap-4 overflow-x-auto'
 				style={{
 					height: `calc(100% - ${HEIGHT.switcher})`,
@@ -325,10 +366,11 @@ const KanbanView = React.memo(
 					onDragStart={onDragStart}
 					onDragOver={onDragOver}
 					onDragEnd={onDragEnd}
-					sensors={sensors}
+					sensors={customSensors}
 					collisionDetection={closestCorners}
 				>
 					<SortableContext
+						disabled={isMarkdownOpen}
 						strategy={rectSwappingStrategy}
 						items={columnsIds as string[]}
 					>
@@ -337,70 +379,45 @@ const KanbanView = React.memo(
 								return (
 									<KanbanColumn
 										column={column}
+										setColumns={setColumns}
 										key={column.id}
 										onAddTask={onAddTask}
+										onDeleteTask={onDeleteTask}
 										onDeleteColumn={onDeleteColumn}
-									>
-										<SortableContext
-											strategy={rectSwappingStrategy}
-											items={column.tasks.map(task => task.id)}
-										>
-											<AnimatePresence>
-												{column.tasks.map(task => (
-													<KanbanCard
-														key={task.id}
-														id={task.id}
-														task={task}
-														onDeleteTask={onDeleteTask}
-													/>
-												))}
-											</AnimatePresence>
-										</SortableContext>
-									</KanbanColumn>
+										tasks={tasks[column.id as string] || []}
+									/>
 								)
 							})}
 						</AnimatePresence>
 
 						{
-							<Dialog
+							<DialogTemplate
 								open={showAddColumnModal}
-								onOpenChange={() => setShowAddColumnModal(prev => !prev)}
+								setOpen={setShowAddColumnModal}
+								btnText='Add column'
+								title='Add a name of a new column'
+								onClick={onAddColumn}
+								inputProps={{
+									value: columnName,
+									onChange: setColumnName,
+								}}
 							>
-								<DialogTrigger asChild>
-									<KanbanAddNewItem>Add column...</KanbanAddNewItem>
-								</DialogTrigger>
-								<DialogContent
-									aria-describedby='modal-content'
-									className='sm:max-w-md'
-								>
-									<DialogHeader className='flex gap-2'>
-										<DialogTitle>Add a name of a new column</DialogTitle>
-										<DialogDescription>
-											<Input
-												value={columnName}
-												type='text'
-												name='columnName'
-												onChange={e => setColumnName(e.target.value)}
-												placeholder='Column name'
-											/>
-										</DialogDescription>
-									</DialogHeader>
-
-									<Button variant={'default'} onClick={onAddColumn}>
-										Add column
-									</Button>
-								</DialogContent>
-							</Dialog>
+								<KanbanAddNewItem>Add column...</KanbanAddNewItem>
+							</DialogTemplate>
 						}
 					</SortableContext>
 
 					{createPortal(
 						<DragOverlay>
 							{activeTask && (
-								<KanbanCard
+								<KanbanCard /// TODO: create a CardOverlay component
 									id={activeTask.id}
 									task={activeTask}
 									onDeleteTask={onDeleteTask}
+									isCreateTaskFinished={false}
+									setIsCreateTaskFinished={function (value: boolean): void {
+										throw new Error('Function not implemented.')
+									}}
 								/>
 							)}
 						</DragOverlay>,

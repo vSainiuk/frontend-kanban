@@ -52,7 +52,6 @@ export default function ListRow({ item, setItems }: ListRowProps) {
 					control={control}
 					name='isCompleted'
 					render={({ field: { value, onChange } }) => (
-						console.log('value', value, onChange),
 						(
 							<Checkbox
 								checked={value}

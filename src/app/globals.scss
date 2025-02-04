@@ -6,7 +6,7 @@
 
 body {
   @apply text-base overflow-hidden text-white;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: 'Trebuchet MS', 'Arial Narrow', Arial, sans-serif;
   // cursor: url('/assets/utils/cursor.png'), auto;
 }
 
@@ -70,4 +70,17 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+}
+
+@keyframes progress {
+	from {
+		width: 100%;
+	}
+	to {
+		width: 0;
+	}
+}
+
+.animate-progress {
+	animation: progress 5s linear forwards;
 }

@@ -22,7 +22,7 @@ export default function DashboardLayout({
 		>
 			<Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-			<main className='bg-background overflow-x-hidden max-h-screen relative px-5'>
+			<main className='bg-background overflow-x-hidden max-h-screen relative'>
 				<Header />
 				{children}
 			</main>

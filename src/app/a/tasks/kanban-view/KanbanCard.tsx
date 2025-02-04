@@ -55,10 +55,12 @@ export default function KanbanCard({ item, setItems }: KanbanCardProps) {
 	const [isCreateTaskFinished, setIsCreateTaskFinished] =
 		useState<boolean>(false)
 	const [isDateChanged, setIsDateChanged] = useState<boolean>(false)
+	
 	useTaskDebounce({
 		watch,
 		itemId: item.id,
 		isCreateTaskFinished,
+		setIsCreateTaskFinished,
 		isDateChanged,
 	})
 	const { deleteTask, isPendingDeleteTask } = useDeleteTask()

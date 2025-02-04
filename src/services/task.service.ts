@@ -1,4 +1,5 @@
 import { axiosWithAuth } from '@/api/interceptors'
+import { OrderItemsDto } from '@/types/orderItemsDto'
 import { Task, TaskFormState } from '@/types/task.types'
 
 class TaskService {
@@ -31,6 +32,11 @@ class TaskService {
 		const response = await axiosWithAuth.delete<boolean>(
 			`${this.BASE_URL}/${id}`
 		)
+		return response
+	}
+
+	async moveTasks(newTasks: OrderItemsDto[]) {
+		const response = await axiosWithAuth.patch<Task[]>(this.BASE_URL, newTasks)
 		return response
 	}
 }

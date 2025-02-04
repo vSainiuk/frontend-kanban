@@ -1,58 +1,38 @@
 import { TaskFormState } from '@/types/task.types'
 import debounce from 'lodash.debounce'
-import { useCallback, useEffect } from 'react'
-import { UseFormWatch } from 'react-hook-form'
-import { useCreateTask } from './useCreateTask'
+import { useCallback, useEffect, useRef } from 'react'
 import { useUpdateTask } from './useUpdateTask'
 
-interface UseTaskDebounce {
-	watch: UseFormWatch<TaskFormState>
+interface UseTaskDebounceProps {
 	itemId: string
-	isCreateTaskFinished: boolean
-	isDateChanged: boolean
+	formState: TaskFormState
 }
 
-export function useTaskDebounce({
-	watch,
-	itemId,
-	isCreateTaskFinished,
-	isDateChanged,
-}: UseTaskDebounce) {
-	const { createTask } = useCreateTask()
+export function useTaskDebounce({ itemId, formState }: UseTaskDebounceProps) {
 	const { updateTask } = useUpdateTask()
 
-	const debouncedCreateTask = useCallback(
-		debounce((formData: TaskFormState) => createTask(formData), 400),
-		[]
-	)
+	const prevFormState = useRef<TaskFormState>(formState)
 
 	const debouncedUpdateTask = useCallback(
-		debounce(
-			(formData: TaskFormState) => updateTask({ id: itemId, data: formData }),
-			400
-		),
-		[]
+		debounce((updatedData: TaskFormState) => {
+			if (itemId) {
+				updateTask({ id: itemId, data: updatedData })
+			}
+		}, 400),
+		[itemId, updateTask]
 	)
 
 	useEffect(() => {
-		const { unsubscribe } = watch(formData => {
-			if (itemId) {
-				debouncedUpdateTask({
-					...formData,
-					priority: formData.priority || undefined,
-				})
-			}
-		})
+		const hasChanged =
+			JSON.stringify(prevFormState.current) !== JSON.stringify(formState)
+
+		if (hasChanged) {
+			debouncedUpdateTask(formState)
+			prevFormState.current = formState
+		}
 
 		return () => {
-			unsubscribe()
+			debouncedUpdateTask.cancel()
 		}
-	}, [watch, itemId, debouncedUpdateTask])
-
-	useEffect(() => {
-		if (isCreateTaskFinished || isDateChanged) {
-			const formData = watch()
-			debouncedCreateTask(formData)
-		}
-	}, [isCreateTaskFinished, isDateChanged, watch, debouncedCreateTask])
+	}, [formState, debouncedUpdateTask])
 }

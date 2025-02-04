@@ -15,4 +15,8 @@ export interface Task extends Root {
 	columnId: string
 }
 
+export type TasksByColumn = {
+  [columnId: string]: Task[];
+};
+
 export type TaskFormState = Partial<Omit<Task, 'id' | 'updatedAt'>>

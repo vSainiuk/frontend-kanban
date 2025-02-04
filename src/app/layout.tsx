@@ -33,7 +33,7 @@ export default function RootLayout({
 			<body className={`${fontFamily.className} antialiased`}>
 				<Providers>
 					{children}
-					<Toaster theme='dark' position='bottom-right' duration={1500} />
+					<Toaster theme='dark' expand position='bottom-right' closeButton={true} duration={1500} />
 				</Providers>
 			</body>
 		</html>
