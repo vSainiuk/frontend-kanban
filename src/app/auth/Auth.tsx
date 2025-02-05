@@ -48,6 +48,7 @@ export default function Auth() {
 							placeholder='Enter your email'
 							id='email'
 							type='email'
+							autoComplete='on'
 						/>
 
 						<Input
@@ -55,6 +56,7 @@ export default function Auth() {
 							placeholder='Enter your password'
 							id='password'
 							type='password'
+							autoComplete='on'
 						/>
 					</div>
 
