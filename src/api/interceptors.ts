@@ -28,9 +28,15 @@ axiosWithAuth.interceptors.request.use(config => {
 })
 
 axiosWithAuth.interceptors.response.use(
-	config => config,
+	config => {
+		console.log('config NOT error', config)
+		return config
+	},
+
 	async error => {
 		const originalRequest = error.config
+
+		console.log('axiosWithAuth.interceptor')
 
 		if (
 			(error.response.status === 401 ||
@@ -39,12 +45,19 @@ axiosWithAuth.interceptors.response.use(
 			error.config &&
 			!error.config._isRetry
 		) {
+			console.log('axiosWithAuth.interceptor (IF)')
 			originalRequest._isRetry = true
 			try {
 				await authService.getNewTokens()
+
+				console.log('await authService.getNewTokens()')
+
 				return axiosWithAuth.request(originalRequest)
 			} catch (error) {
 				if (errorCatch(error) === 'jwt expired') {
+
+					console.log('jwt expired, removeTokenStorage()')
+
 					removeTokenStorage()
 				}
 			}
