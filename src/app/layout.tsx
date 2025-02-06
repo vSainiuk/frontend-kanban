@@ -4,6 +4,7 @@ import { Noto_Sans } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './globals.scss'
 import './custom-styles/scrollbar-styles.scss'
+import './custom-styles/loader-circle.scss'
 
 import { Providers } from './providers'
 

@@ -8,7 +8,7 @@ import { authService } from '@/services/auth.service'
 import { AuthForm } from '@/types/auth.types'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -19,7 +19,7 @@ export default function Auth() {
 
 	const [isLoginForm, setIsLoginForm] = useState(false)
 	const { push } = useRouter()
-	const { mutate } = useMutation({
+	const { mutate, isPending } = useMutation({
 		mutationKey: ['auth'],
 		mutationFn: (data: AuthForm) =>
 			authService.main(isLoginForm ? 'login' : 'register', data),
@@ -33,6 +33,18 @@ export default function Auth() {
 		mutate(data)
 	}
 
+	useEffect(() => {
+		if (isPending) {
+			const timeout = setTimeout(() => {
+				toast.warning('Login is taking longer than usual... Please wait.', {
+					duration: 5000,
+				})
+			}, 5000)
+
+			return () => clearTimeout(timeout)
+		}
+	}, [isPending])
+
 	return (
 		<div className='flex min-h-screen bg-auth-pattern bg-no-repeat bg-cover px-2'>
 			<form
@@ -42,13 +54,14 @@ export default function Auth() {
 				<div className='flex flex-col items-center gap-4 justify-center p-4'>
 					<Heading>Auth</Heading>
 
-					<div className='flex flex-col gap-3 w-full'>
+					<div className='relative flex flex-col gap-3 w-full'>
 						<Input
 							{...register('email', { required: 'Email is missing!' })}
 							placeholder='Enter your email'
 							id='email'
 							type='email'
 							autoComplete='on'
+							disabled={isPending}
 						/>
 
 						<Input
@@ -57,12 +70,21 @@ export default function Auth() {
 							id='password'
 							type='password'
 							autoComplete='on'
+							disabled={isPending}
 						/>
+
+						{isPending && (
+							<div className='absolute top-2/4 right-2/4 translate-x-1/2 -translate-y-1/2 loader-circle'></div>
+						)}
 					</div>
 
 					<div className='flex items-center gap-3'>
-						<Button onClick={() => setIsLoginForm(true)}>Login</Button>
-						<Button onClick={() => setIsLoginForm(false)}>Register</Button>
+						<Button disabled={isPending} onClick={() => setIsLoginForm(true)}>
+							Login
+						</Button>
+						<Button disabled={isPending} onClick={() => setIsLoginForm(false)}>
+							Register
+						</Button>
 					</div>
 				</div>
 			</form>
