@@ -52,3 +52,12 @@ Upcoming features for **Planner** include:
 ✅ **Calendar** for task scheduling  
 ✅ **Reports & analytics** for task tracking  
 ✅ **Custom notifications** for task updates  
+
+---
+
+## 🌍 Live Demo  
+
+🔗 **Check out the live version of Planner:** [Planner App](https://frontend-kanban-beta.vercel.app/a/tasks-lite)  
+
+---
+
