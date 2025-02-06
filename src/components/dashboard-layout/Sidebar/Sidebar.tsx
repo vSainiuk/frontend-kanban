@@ -59,8 +59,9 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
 				<ul className={cn('flex sm:flex-col justify-between z-10')}>
 					{menuData.map((menu, index) => {
+						const isLogout = menu.title === 'Log Out'
 						return (
-							<MenuItem menu={menu} key={index} isCollapsed={isCollapsed} />
+							<MenuItem isLogout={isLogout} menu={menu} key={index} isCollapsed={isCollapsed} />
 						)
 					})}
 				</ul>

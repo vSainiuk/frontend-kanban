@@ -1,3 +1,4 @@
+import { axiosWithAuth } from '@/api/interceptors'
 import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -12,11 +13,29 @@ export interface MenuItem {
 type MenuItemProps = {
 	menu: MenuItem
 	isCollapsed: boolean
+	isLogout?: boolean
 }
 
-export default function MenuItem({ menu, isCollapsed }: MenuItemProps) {
+export default function MenuItem({
+	menu,
+	isCollapsed,
+	isLogout,
+}: MenuItemProps) {
 	const pathname = usePathname()
 	const isActive = pathname === menu.link
+
+	const handleLogout = async (
+		event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+	) => {
+		event.preventDefault()
+
+		document.cookie = `access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=None; Secure; Partitioned;`
+
+		await axiosWithAuth.post('/auth/logout').then(() => {
+			window.location.reload()
+		})
+	}
+
 	return (
 		<li
 			className={`relative flex items-center transition-colors rounded-xl ${
@@ -26,7 +45,8 @@ export default function MenuItem({ menu, isCollapsed }: MenuItemProps) {
 			<Link
 				draggable={false}
 				className={`w-full select-none sm:flex gap-2 p-3`}
-				href={menu.link}
+				href={isLogout ? '#logout' : menu.link}
+				onClick={isLogout ? handleLogout : undefined}
 			>
 				<motion.div initial={{ opacity: 0 }} animate={{ opacity: 100 }}>
 					<menu.icon className='w-8 h-8 sm:w-6 sm:h-6' />

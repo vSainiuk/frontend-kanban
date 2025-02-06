@@ -27,9 +27,9 @@ export const menuData: MenuItem[] = [
 	// 	icon: Settings,
 	// 	link: '/a/settings',
 	// },
-	// {
-	// 	title: 'Log Out',
-	// 	icon: LogOut,
-	// 	link: '/a/logout',
-	// }
+	{
+		title: 'Log Out',
+		icon: LogOut,
+		link: '-',
+	}
 ]
