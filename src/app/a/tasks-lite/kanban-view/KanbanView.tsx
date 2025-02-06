@@ -45,8 +45,7 @@ const KanbanView = React.memo(
 		const { tasks: data } = useTasks()
 		const [tasks, setTasks] = useState<TasksByColumn>({})
 		const [activeTask, setActiveTask] = useState<Task | null>(null)
-		const [isExistingTempTask, setIsExistingTempTask] =
-		useState<boolean>(false)
+		const [isExistingTempTask, setIsExistingTempTask] = useState<boolean>(false)
 
 		const debouncedUpdateTasksRef = useRef(
 			debounce((updatedTasks: OrderItemsDto[]) => {
@@ -175,10 +174,14 @@ const KanbanView = React.memo(
 		}
 
 		function onDeleteTask({ id, columnId }: Task) {
-			setTasks(prev => ({
-				...prev,
-				[columnId]: prev[columnId].filter(task => task.id !== id),
-			}))
+			setTasks(prev => {
+				if (!prev[columnId]) return prev
+
+				return {
+					...prev,
+					[columnId]: prev[columnId].filter(task => task.id !== id),
+				}
+			})
 		}
 
 		function onDragStart(event: DragStartEvent) {
