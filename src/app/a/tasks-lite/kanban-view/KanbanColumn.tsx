@@ -103,7 +103,7 @@ export default function KanbanColumn({
 		>
 			<div className={cn('mb-4 p-2', isDragging && 'opacity-50')}>
 				<div className='flex items-center justify-between border-b-2 border-border mb-2'>
-					<h2 className='text-xl italic text-ellipsis max-w-[75%] overflow-hidden'>
+					<h2 className='text-xl text-ellipsis max-w-[75%] overflow-hidden'>
 						{label}
 					</h2>
 

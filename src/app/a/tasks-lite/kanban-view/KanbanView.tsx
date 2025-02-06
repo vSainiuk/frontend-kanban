@@ -96,18 +96,18 @@ const KanbanView = React.memo(
 
 		const customSensors = useSensors(mouseSensor, touchSensor)
 
-		const handlePointerDown = (event: any) => {
-			if (event.target.closest('[data-no-dnd]')) {
-				event.stopPropagation()
-			}
-		}
+		// const handlePointerDown = (event: any) => {
+		// 	if (event.target.closest('[data-no-dnd]')) {
+		// 		event.stopPropagation()
+		// 	}
+		// }
 
-		useEffect(() => {
-			document.addEventListener('pointerdown', handlePointerDown)
-			return () => {
-				document.removeEventListener('pointerdown', handlePointerDown)
-			}
-		}, [])
+		// useEffect(() => {
+		// 	document.addEventListener('pointerdown', handlePointerDown)
+		// 	return () => {
+		// 		document.removeEventListener('pointerdown', handlePointerDown)
+		// 	}
+		// }, [])
 
 		function onAddColumn() {
 			if (!columnName) return

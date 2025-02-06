@@ -342,6 +342,7 @@ const KanbanCardContent = memo(
 							<Tooltip delayDuration={300}>
 								<TooltipTrigger asChild>
 									<TransparentInput
+										onMouseDown={e => e.stopPropagation()}
 										disabled={isCompleted}
 										value={title}
 										onChange={e => setTitle(e.target.value)}
