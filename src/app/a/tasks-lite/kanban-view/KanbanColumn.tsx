@@ -34,6 +34,8 @@ interface KanbanColumnProps {
 	onDeleteTask: (task: Task) => void
 	onDeleteColumn: (columnId: UniqueIdentifier) => void
 	tasks: Task[]
+	isExistingTempTask: boolean
+	setIsExistingTempTask: (value: boolean) => void
 }
 
 export default function KanbanColumn({
@@ -43,6 +45,8 @@ export default function KanbanColumn({
 	onDeleteTask,
 	onDeleteColumn,
 	tasks,
+	isExistingTempTask,
+	setIsExistingTempTask,
 }: KanbanColumnProps) {
 	const { id, label } = column
 	const {
@@ -67,8 +71,6 @@ export default function KanbanColumn({
 		transition,
 	}
 
-	const [isCreateTaskFinished, setIsCreateTaskFinished] =
-		useState<boolean>(false)
 	const [isEditColumnNameOpen, setIsEditColumnNameOpen] =
 		useState<boolean>(false)
 	const [newEditColumnName, setNewEditColumnName] = useState<string>(label)
@@ -168,24 +170,25 @@ export default function KanbanColumn({
 										id={task.id}
 										task={task}
 										onDeleteTask={onDeleteTask}
-										isCreateTaskFinished={isCreateTaskFinished}
-										setIsCreateTaskFinished={setIsCreateTaskFinished}
+										isExistingTempTask={isExistingTempTask}
+										setIsExistingTempTask={setIsExistingTempTask}
 									/>
 								))}
 						</AnimatePresence>
 					</SortableContext>
 				</div>
 
-				{
+				{!isExistingTempTask && (
 					<KanbanAddNewCard
 						columnId={id}
 						onClick={() => {
+							setIsExistingTempTask(true)
 							onAddTask(id)
 						}}
 					>
 						Add task...
 					</KanbanAddNewCard>
-				}
+				)}
 			</div>
 		</motion.div>
 	)

@@ -22,7 +22,7 @@ import {
 import { TransparentInput } from '@/components/ui/transparent-input'
 import { useMarkdownContext } from '@/contexts/MarkdownContext'
 import { cn } from '@/lib/utils'
-import type { Task } from '@/types/task.types'
+import type { Task, TaskPriority } from '@/types/task.types'
 import { UniqueIdentifier } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -41,16 +41,16 @@ interface KanbanCardProps {
 	id: UniqueIdentifier
 	task: Task
 	onDeleteTask: (task: Task) => void
-	isCreateTaskFinished: boolean
-	setIsCreateTaskFinished: (value: boolean) => void
+	isExistingTempTask: boolean
+	setIsExistingTempTask: (value: boolean) => void
 }
 const KanbanCard = memo(
 	function KanbanCard({
 		id,
 		task,
 		onDeleteTask,
-		isCreateTaskFinished,
-		setIsCreateTaskFinished,
+		isExistingTempTask,
+		setIsExistingTempTask,
 	}: KanbanCardProps) {
 		const { updateTask } = useUpdateTask()
 		const [title, setTitle] = useState(task.title)
@@ -64,6 +64,7 @@ const KanbanCard = memo(
 
 		const handleDeleteTask = () => {
 			setIsDeletedTask(true)
+			setIsExistingTempTask(false)
 
 			const duration = 5000
 
@@ -79,6 +80,7 @@ const KanbanCard = memo(
 						variant='ghost'
 						className='ml-4'
 						onClick={() => {
+							setIsExistingTempTask(true)
 							setIsDeletedTask(false)
 							if (deleteTimeoutRef.current) {
 								clearTimeout(deleteTimeoutRef.current)
@@ -97,7 +99,7 @@ const KanbanCard = memo(
 			)
 
 			deleteTimeoutRef.current = setTimeout(() => {
-				deleteTask(task.id)
+				if (createdAt) deleteTask(task.id)
 				onDeleteTask(task)
 				toast.dismiss(toastId)
 			}, duration)
@@ -131,6 +133,7 @@ const KanbanCard = memo(
 
 		useTaskDebounce({
 			itemId: task.id,
+			isNewTask: createdAt ? false : true,
 			formState: {
 				title,
 				description,
@@ -139,12 +142,14 @@ const KanbanCard = memo(
 
 		const handleTaskComplete = (val: boolean) => {
 			setIsCompleted(val)
-			updateTask({
-				id: task.id,
-				data: {
-					isCompleted: val,
-				},
-			})
+			if (task.createdAt) {
+				updateTask({
+					id: task.id,
+					data: {
+						isCompleted: val,
+					},
+				})
+			}
 		}
 
 		const { setIsMarkdownOpen } = useMarkdownContext()
@@ -202,6 +207,7 @@ const KanbanCard = memo(
 					<KanbanCardContent
 						task={task}
 						title={title}
+						description={description}
 						setTitle={setTitle}
 						isCompleted={isCompleted}
 						setIsCompleted={handleTaskComplete}
@@ -213,6 +219,7 @@ const KanbanCard = memo(
 						setIsOpenMarkdownDialog={setIsOpenMarkdownDialog}
 						createTask={createTask}
 						deleteTask={deleteTask}
+						setIsExistingTempTask={setIsExistingTempTask}
 					/>
 				</motion.div>
 
@@ -265,15 +272,18 @@ const KanbanCardContent = memo(
 		setIsCompleted,
 		priority,
 		setPriority,
+		description,
 		createdAt,
 		setCreatedAt,
 		handleDeleteTask,
 		setIsOpenMarkdownDialog,
 		createTask,
 		deleteTask,
+		setIsExistingTempTask,
 	}: {
 		task: Task
 		title: string
+		description?: string
 		setTitle: (val: string) => void
 		isCompleted: boolean
 		setIsCompleted: (val: boolean) => void
@@ -290,6 +300,7 @@ const KanbanCardContent = memo(
 			unknown
 		>
 		deleteTask: (id: string) => void
+		setIsExistingTempTask: (value: boolean) => void
 	}) => {
 		return (
 			<>
@@ -319,6 +330,7 @@ const KanbanCardContent = memo(
 						/>
 						<PrioritySelect
 							taskId={task.id}
+							taskCreatedAt={task.createdAt}
 							priority={priority}
 							setPriority={setPriority}
 							isCompleted={isCompleted}
@@ -345,20 +357,29 @@ const KanbanCardContent = memo(
 
 						{!createdAt && (
 							<CircleCheck
-								onClick={() =>
+								onClick={() => {
+									console.log({
+										title,
+										isCompleted,
+										columnId: task.columnId,
+										order: task.order,
+										description,
+										priority: (priority as TaskPriority) || undefined,
+									})
+									setIsExistingTempTask(false)
 									createTask({
 										title,
 										isCompleted,
 										columnId: task.columnId,
 										order: task.order,
-										description: task.description,
-										priority: task.priority,
+										description,
+										priority: (priority as TaskPriority) || undefined,
 									})
-								}
+								}}
 								className={cn(
 									'hover:text-green-500 transition-colors',
 									'w-6 h-6',
-									isCompleted ? 'text-green-500' : 'text-muted'
+									isCompleted && 'text-white'
 								)}
 							/>
 						)}
@@ -370,6 +391,7 @@ const KanbanCardContent = memo(
 	(prevProps, nextProps) => {
 		return (
 			prevProps.title === nextProps.title &&
+			prevProps.description === nextProps.description &&
 			prevProps.isCompleted === nextProps.isCompleted &&
 			prevProps.priority === nextProps.priority &&
 			prevProps.createdAt === nextProps.createdAt

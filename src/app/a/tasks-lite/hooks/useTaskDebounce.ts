@@ -5,10 +5,15 @@ import { useUpdateTask } from './useUpdateTask'
 
 interface UseTaskDebounceProps {
 	itemId: string
+	isNewTask: boolean
 	formState: TaskFormState
 }
 
-export function useTaskDebounce({ itemId, formState }: UseTaskDebounceProps) {
+export function useTaskDebounce({
+	itemId,
+	isNewTask,
+	formState,
+}: UseTaskDebounceProps) {
 	const { updateTask } = useUpdateTask()
 
 	const prevFormState = useRef<TaskFormState>(formState)
@@ -27,7 +32,10 @@ export function useTaskDebounce({ itemId, formState }: UseTaskDebounceProps) {
 			JSON.stringify(prevFormState.current) !== JSON.stringify(formState)
 
 		if (hasChanged) {
-			debouncedUpdateTask(formState)
+			if (!isNewTask) {
+				debouncedUpdateTask(formState)
+			}
+			
 			prevFormState.current = formState
 		}
 

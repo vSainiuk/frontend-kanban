@@ -46,7 +46,7 @@ export default function DayPicker({
 
 		if (isoDate) {
 			onChange(isoDate)
-			updateTask({ id: taskId, data: { createdAt: isoDate } })
+			if (value) updateTask({ id: taskId, data: { createdAt: isoDate } })
 			setIsShow(false)
 		} else {
 			onChange('')

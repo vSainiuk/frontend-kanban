@@ -45,6 +45,8 @@ const KanbanView = React.memo(
 		const { tasks: data } = useTasks()
 		const [tasks, setTasks] = useState<TasksByColumn>({})
 		const [activeTask, setActiveTask] = useState<Task | null>(null)
+		const [isExistingTempTask, setIsExistingTempTask] =
+		useState<boolean>(false)
 
 		const debouncedUpdateTasksRef = useRef(
 			debounce((updatedTasks: OrderItemsDto[]) => {
@@ -162,6 +164,7 @@ const KanbanView = React.memo(
 				columnId: columnId as string,
 				isCompleted: false,
 				title: '',
+				description: '',
 				order: tasks[columnId as string]?.length || 0,
 			}
 
@@ -382,6 +385,8 @@ const KanbanView = React.memo(
 										onDeleteTask={onDeleteTask}
 										onDeleteColumn={onDeleteColumn}
 										tasks={tasks[column.id as string] || []}
+										isExistingTempTask={isExistingTempTask}
+										setIsExistingTempTask={setIsExistingTempTask}
 									/>
 								)
 							})}
@@ -411,8 +416,8 @@ const KanbanView = React.memo(
 									id={activeTask.id}
 									task={activeTask}
 									onDeleteTask={onDeleteTask}
-									isCreateTaskFinished={false}
-									setIsCreateTaskFinished={function (value: boolean): void {
+									isExistingTempTask={false}
+									setIsExistingTempTask={function (value: boolean): void {
 										throw new Error('Function not implemented.')
 									}}
 								/>

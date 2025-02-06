@@ -15,6 +15,7 @@ interface PrioritySelectProps {
 	priority: string
 	setPriority: (value: string) => void
 	isCompleted: boolean
+	taskCreatedAt: string | undefined
 }
 
 export default function PrioritySelect({
@@ -22,6 +23,7 @@ export default function PrioritySelect({
 	priority,
 	setPriority,
 	isCompleted,
+	taskCreatedAt,
 }: PrioritySelectProps) {
 	const { updateTask } = useUpdateTask()
 	return (
@@ -31,7 +33,8 @@ export default function PrioritySelect({
 			onValueChange={(value: string) => {
 				if (value === priority) return
 				setPriority(value)
-				updateTask({ id: taskId, data: { priority: value as TaskPriority } })
+				if (taskCreatedAt)
+					updateTask({ id: taskId, data: { priority: value as TaskPriority } })
 			}}
 		>
 			<SelectTrigger className='bg-transparent border-none p-0 rounded-md w-fit'>
