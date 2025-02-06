@@ -54,12 +54,8 @@ axiosWithAuth.interceptors.response.use(
 
 				return axiosWithAuth.request(originalRequest)
 			} catch (error) {
-				if (errorCatch(error) === 'jwt expired') {
-
-					console.log('jwt expired, removeTokenStorage()')
-
-					removeTokenStorage()
-				}
+				removeTokenStorage()
+				window.location.href = '/auth'
 			}
 		}
 
