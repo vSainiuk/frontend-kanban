@@ -12,7 +12,7 @@ const config: Config = {
   theme: {
   	extend: {
 			fontFamily: {
-        'cursive' : ['Allura', 'cursive'],
+        'cursive': ['var(--allura-font)', 'cursive'],
       },
   		colors: COLORS,
   		borderRadius: {
