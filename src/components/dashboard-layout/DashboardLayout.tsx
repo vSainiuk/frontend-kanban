@@ -12,6 +12,8 @@ export default function DashboardLayout({
 	const [isCollapsed, setIsCollapsed, isLoading] =
 		useLocalStorage<boolean>('isCollapsed')
 
+	if (isLoading) return null
+
 	return (
 		<div
 			className={`grid min-h-screen shrink-0 transition-all duration-300 ${
