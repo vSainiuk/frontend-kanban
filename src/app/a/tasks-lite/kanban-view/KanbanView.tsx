@@ -3,7 +3,7 @@
 import DialogTemplate from '@/components/ui/dialog-template'
 import Loader from '@/components/ui/loader'
 import { HEIGHT } from '@/constants/height-elements.constants'
-import { useMarkdownContext } from '@/contexts/MarkdownContext'
+import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { columnService } from '@/services/column.service'
 import { taskService } from '@/services/task.service'
 import { OrderItemsDto } from '@/types/orderItemsDto'
@@ -40,7 +40,7 @@ import KanbanColumn from './KanbanColumn'
 
 const KanbanView = React.memo(
 	function KanbanView() {
-		const { isMarkdownOpen } = useMarkdownContext()
+		const { disabledDrag } = useDndNoDragContext()
 		const { columns, setColumns } = useColumns()
 		const { tasks: data } = useTasks()
 		const [tasks, setTasks] = useState<TasksByColumn>({})
@@ -373,7 +373,7 @@ const KanbanView = React.memo(
 					collisionDetection={closestCorners}
 				>
 					<SortableContext
-						disabled={isMarkdownOpen}
+						disabled={disabledDrag}
 						strategy={rectSwappingStrategy}
 						items={columnsIds as string[]}
 					>

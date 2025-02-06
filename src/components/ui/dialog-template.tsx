@@ -37,7 +37,7 @@ export default function DialogTemplate({
 		}
 	}
 	return (
-		<Dialog open={open} onOpenChange={() => setOpen(prev => !prev)}>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent aria-describedby='modal-content' className='sm:max-w-md'>
 				<DialogHeader className='flex gap-2'>

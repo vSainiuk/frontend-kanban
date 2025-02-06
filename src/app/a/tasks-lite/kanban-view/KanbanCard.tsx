@@ -20,7 +20,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { TransparentInput } from '@/components/ui/transparent-input'
-import { useMarkdownContext } from '@/contexts/MarkdownContext'
+import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { cn } from '@/lib/utils'
 import type { Task, TaskPriority } from '@/types/task.types'
 import { UniqueIdentifier } from '@dnd-kit/core'
@@ -152,7 +152,7 @@ const KanbanCard = memo(
 			}
 		}
 
-		const { setIsMarkdownOpen } = useMarkdownContext()
+		const { setDisabledDrag } = useDndNoDragContext()
 		const [isOpenMarkdownDialog, setIsOpenMarkdownDialog] = useState(false)
 
 		const style = {
@@ -229,7 +229,7 @@ const KanbanCard = memo(
 						open={isOpenMarkdownDialog}
 						onOpenChange={open => {
 							setIsOpenMarkdownDialog(open)
-							setIsMarkdownOpen(open)
+							setDisabledDrag(open)
 						}}
 					>
 						<DialogTrigger asChild>

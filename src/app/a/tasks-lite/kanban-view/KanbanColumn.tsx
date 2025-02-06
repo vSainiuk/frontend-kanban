@@ -10,6 +10,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog'
 import DialogTemplate from '@/components/ui/dialog-template'
+import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { cn } from '@/lib/utils'
 import { columnService } from '@/services/column.service'
 import { Column } from '@/types/column.types'
@@ -23,7 +24,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Edit2, GripHorizontal, Trash2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import KanbanAddNewCard from './KanbanAddNewItem'
 import KanbanCard from './KanbanCard'
 
@@ -74,6 +75,7 @@ export default function KanbanColumn({
 	const [isEditColumnNameOpen, setIsEditColumnNameOpen] =
 		useState<boolean>(false)
 	const [newEditColumnName, setNewEditColumnName] = useState<string>(label)
+	const { setDisabledDrag } = useDndNoDragContext()
 
 	const handleEditColumnName = () => {
 		setIsEditColumnNameOpen(false)
@@ -89,6 +91,10 @@ export default function KanbanColumn({
 			)
 		})
 	}
+
+	useEffect(() => {
+		setDisabledDrag(isEditColumnNameOpen)
+	}, [isEditColumnNameOpen])
 
 	return (
 		<motion.div

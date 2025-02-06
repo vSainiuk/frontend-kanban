@@ -61,7 +61,7 @@ export default function MarkdownEditor({
 	}
 
 	return (
-		<div className='z-50' data-no-dnd>
+		<div className='z-50'>
 			<Editor
 				ref={editorRef}
 				height='500px'

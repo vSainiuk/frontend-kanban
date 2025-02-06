@@ -1,10 +1,12 @@
 'use client'
 
 import { HEIGHT } from '@/constants/height-elements.constants'
-import { MarkdownProvider } from '@/contexts/MarkdownContext'
+import { DndNoDragProvider } from '@/contexts/DndNoDragContext'
 import dynamic from 'next/dynamic'
 
-const KanbanView = dynamic(() => import('./kanban-view/KanbanView'), { ssr: false })
+const KanbanView = dynamic(() => import('./kanban-view/KanbanView'), {
+	ssr: false,
+})
 
 export default function TasksPage() {
 	return (
@@ -14,9 +16,9 @@ export default function TasksPage() {
 				height: `calc(100% - ${HEIGHT.header})`,
 			}}
 		>
-			<MarkdownProvider>
+			<DndNoDragProvider>
 				<KanbanView />
-			</MarkdownProvider>
+			</DndNoDragProvider>
 		</div>
 	)
 }
