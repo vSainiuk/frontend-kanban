@@ -5,13 +5,9 @@ import { EnumTokens } from './services/auth-token.service'
 export async function middleware(request: NextRequest, response: NextResponse) {
 	const { url, cookies } = request
 	
-	console.log('url', url, 'cookies', cookies)
-
 	const accessToken = cookies.get(EnumTokens.ACCESS_TOKEN)?.value
 
 	const isAuthPage = url.includes('/auth')
-
-	console.log('accessToken', accessToken, 'isAuthPage', isAuthPage)
 
 	if (accessToken && isAuthPage) {
 		/// If the user is logged in and tries to access the auth page, redirect to the home page

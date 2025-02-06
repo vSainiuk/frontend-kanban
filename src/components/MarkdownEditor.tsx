@@ -1,5 +1,6 @@
 'use client'
 
+import { axiosWithAuth } from '@/api/interceptors'
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css'
 import '@toast-ui/editor/dist/toastui-editor.css'
 
@@ -45,14 +46,14 @@ export default function MarkdownEditor({
 			const formData = new FormData()
 			formData.append('file', blob)
 
-			const response = await fetch('http://localhost:4200/api/upload', {
-				method: 'POST',
-				body: formData,
+			const response = await axiosWithAuth.post('/upload', formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
 			})
 
-			const data = await response.json()
-			if (data.url) {
-				callback(data.url, blob.name)
+			if (response.data.url) {
+				callback(response.data.url, blob.name)
 			}
 		} catch (error) {
 			console.error('Image upload failed:', error)
