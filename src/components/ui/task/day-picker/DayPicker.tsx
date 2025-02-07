@@ -1,3 +1,4 @@
+import { useCreateTask } from '@/app/a/tasks-lite/hooks/useCreateTask'
 import { useUpdateTask } from '@/app/a/tasks-lite/hooks/useUpdateTask'
 import {
 	Dialog,
@@ -7,6 +8,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog'
 import { useOutside } from '@/hooks/useOutside'
+import { Task } from '@/types/task.types'
 import dayjs from 'dayjs'
 import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 import { Calendar1 } from 'lucide-react'
@@ -17,19 +19,22 @@ import 'react-day-picker/style.css'
 dayjs.extend(LocalizedFormat)
 
 interface DayPickerProps {
-	taskId: string
+	task: Task
 	onChange: (date: string) => void
 	value: string | null
 	isCompletedTask?: boolean
+	setIsExistingTempTask: (value: boolean) => void
 }
 
 export default function DayPicker({
-	taskId,
+	task,
 	onChange,
 	value,
 	isCompletedTask,
+	setIsExistingTempTask,
 }: DayPickerProps) {
 	const { updateTask } = useUpdateTask()
+	const { createTask } = useCreateTask()
 	const [selectedDate, setSelectedDate] = useState<Date | null>(
 		value ? dayjs(value).toDate() : null
 	)
@@ -46,7 +51,14 @@ export default function DayPicker({
 
 		if (isoDate) {
 			onChange(isoDate)
-			if (value) updateTask({ id: taskId, data: { createdAt: isoDate } })
+			if (value) {
+				updateTask({ id: task.id, data: { createdAt: isoDate } })
+			} else {
+				const newTask = { ...task, createdAt: isoDate }
+				createTask(newTask)
+				setIsExistingTempTask(false)
+			}
+
 			setIsShow(false)
 		} else {
 			onChange('')

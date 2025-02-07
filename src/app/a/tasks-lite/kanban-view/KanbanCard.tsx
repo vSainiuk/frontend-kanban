@@ -331,10 +331,11 @@ const KanbanCardContent = memo(
 							onCheckedChange={setIsCompleted}
 						/>
 						<DayPicker
-							taskId={task.id}
+							task={task}
 							isCompletedTask={isCompleted}
 							value={createdAt}
 							onChange={setCreatedAt}
+							setIsExistingTempTask={setIsExistingTempTask}
 						/>
 						<PrioritySelect
 							taskId={task.id}
