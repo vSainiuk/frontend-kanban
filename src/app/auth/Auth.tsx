@@ -3,6 +3,7 @@
 import Heading from '@/components/heading'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Loader from '@/components/ui/loader'
 import { DASHBOARD_PAGES } from '@/config/pages-url.config'
 import { authService } from '@/services/auth.service'
 import { AuthForm } from '@/types/auth.types'
@@ -73,9 +74,7 @@ export default function Auth() {
 							disabled={isPending}
 						/>
 
-						{isPending && (
-							<div className='absolute top-2/4 right-2/4 translate-x-1/2 -translate-y-1/2 loader-circle'></div>
-						)}
+						{isPending && <Loader position='center' />}
 					</div>
 
 					<div className='flex items-center gap-3'>

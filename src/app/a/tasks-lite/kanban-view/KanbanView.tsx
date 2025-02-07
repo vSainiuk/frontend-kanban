@@ -350,7 +350,7 @@ const KanbanView = React.memo(
 		}
 		// DND HANDLERS Region end
 
-		if (!columns) return <Loader />
+		if (!columns) return <Loader position='center' />
 
 		return (
 			<div

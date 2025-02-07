@@ -1,7 +1,19 @@
-import { LoaderCircleIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-export default function Loader() {
+interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
+	position?: 'center'
+}
+
+export default function Loader({ position, className, ...props }: LoaderProps) {
 	return (
-		<LoaderCircleIcon size='2rem' className='animate-spin text-secondary' />
+		<div
+			{...props}
+			className={cn(
+				'loader-circle',
+				position === 'center' &&
+					'absolute top-2/4 right-2/4 translate-x-1/2 -translate-y-1/2',
+				className
+			)}
+		></div>
 	)
 }
