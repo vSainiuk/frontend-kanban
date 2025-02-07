@@ -12,7 +12,7 @@ import { Input } from './input'
 interface DialogTemplateProps {
 	open: boolean
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>
-	children: React.ReactNode
+	children?: React.ReactNode
 	title: string
 	btnText: string
 	onClick: () => void

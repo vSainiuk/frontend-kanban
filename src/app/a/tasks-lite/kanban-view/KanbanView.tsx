@@ -1,6 +1,7 @@
 'use client'
 
 import DialogTemplate from '@/components/ui/dialog-template'
+import EllipseButton from '@/components/ui/ellipse-button'
 import Loader from '@/components/ui/loader'
 import { HEIGHT } from '@/constants/height-elements.constants'
 import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
@@ -34,7 +35,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useColumns } from '../hooks/useColumns'
 import { useTasks } from '../hooks/useTasks'
-import KanbanAddNewItem from './KanbanAddNewItem'
 import KanbanCard from './KanbanCard'
 import KanbanColumn from './KanbanColumn'
 
@@ -395,7 +395,7 @@ const KanbanView = React.memo(
 							})}
 						</AnimatePresence>
 
-						{
+						<EllipseButton onClick={() => setShowAddColumnModal(true)}>
 							<DialogTemplate
 								open={showAddColumnModal}
 								setOpen={setShowAddColumnModal}
@@ -406,10 +406,8 @@ const KanbanView = React.memo(
 									value: columnName,
 									onChange: setColumnName,
 								}}
-							>
-								<KanbanAddNewItem>Add column...</KanbanAddNewItem>
-							</DialogTemplate>
-						}
+							/>
+						</EllipseButton>
 					</SortableContext>
 
 					{createPortal(

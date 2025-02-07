@@ -11,7 +11,7 @@ const KanbanView = dynamic(() => import('./kanban-view/KanbanView'), {
 export default function TasksPage() {
 	return (
 		<div
-			className='px-5'
+			className='pl-5'
 			style={{
 				height: `calc(100% - ${HEIGHT.header})`,
 			}}
