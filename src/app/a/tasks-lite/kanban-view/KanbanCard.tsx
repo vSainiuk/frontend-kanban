@@ -302,6 +302,14 @@ const KanbanCardContent = memo(
 		deleteTask: (id: string) => void
 		setIsExistingTempTask: (value: boolean) => void
 	}) => {
+		const inputRef = useRef<HTMLInputElement | null>(null)
+
+		useEffect(() => {
+			if (!createdAt && inputRef.current) {
+				inputRef.current.focus()
+			}
+		}, [createdAt])
+		
 		return (
 			<>
 				<button
@@ -342,6 +350,7 @@ const KanbanCardContent = memo(
 							<Tooltip delayDuration={300}>
 								<TooltipTrigger asChild>
 									<TransparentInput
+										ref={inputRef}
 										onMouseDown={e => e.stopPropagation()}
 										disabled={isCompleted}
 										value={title}
