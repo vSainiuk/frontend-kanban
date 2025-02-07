@@ -7,6 +7,7 @@ import './custom-styles/scrollbar-styles.scss'
 import './globals.scss'
 
 import { Providers } from './providers'
+import { CURRENT_POSITION_TOASTER, DEFAULT_DURATION_TOASTER } from '@/constants/toaster'
 
 const fontFamily = Noto_Sans({
 	subsets: ['cyrillic', 'latin'],
@@ -44,9 +45,9 @@ export default function RootLayout({
 					<Toaster
 						theme='dark'
 						expand
-						position='bottom-right'
+						position={CURRENT_POSITION_TOASTER}
 						closeButton={true}
-						duration={1500}
+						duration={DEFAULT_DURATION_TOASTER}
 					/>
 				</Providers>
 			</body>

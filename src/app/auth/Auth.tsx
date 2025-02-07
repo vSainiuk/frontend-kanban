@@ -7,14 +7,21 @@ import Loader from '@/components/ui/loader'
 import { DASHBOARD_PAGES } from '@/config/pages-url.config'
 import { authService } from '@/services/auth.service'
 import { AuthForm } from '@/types/auth.types'
+import { ErrorMessage } from '@hookform/error-message'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { FieldErrors, SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { schemaEmail, schemaPassword } from './validation-form'
 
 export default function Auth() {
-	const { register, handleSubmit, reset } = useForm<AuthForm>({
+	const {
+		register,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = useForm<AuthForm>({
 		mode: 'onChange',
 	})
 
@@ -22,15 +29,32 @@ export default function Auth() {
 	const { push } = useRouter()
 	const { mutate, isPending } = useMutation({
 		mutationKey: ['auth'],
-		mutationFn: (data: AuthForm) =>
-			authService.main(isLoginForm ? 'login' : 'register', data),
+		mutationFn: async (data: AuthForm) => {
+			try {
+				const response = await authService.main(
+					isLoginForm ? 'login' : 'register',
+					data
+				)
+				return response
+			} catch (error: any) {
+				if (error.response.data.message) {
+					throw new Error(error.response.data.message)
+				} else {
+					throw new Error('An unexpected error occurred')
+				}
+			}
+		},
 		onSuccess: () => {
 			toast.success('Successfully logged in')
 			reset()
 			push(DASHBOARD_PAGES.HOME)
 		},
+		onError: ({ message }) => {
+			toast.error(message)
+		},
 	})
-	const onSubmit: SubmitHandler<AuthForm> = data => {
+
+	const onSubmit: SubmitHandler<AuthForm> = async data => {
 		mutate(data)
 	}
 
@@ -51,28 +75,34 @@ export default function Auth() {
 			<form
 				className='w-full sm:w-1/2 lg:w-1/4 m-auto shadow bg-sidebar/40 rounded-xl'
 				onSubmit={handleSubmit(onSubmit)}
+				method='POST'
 			>
 				<div className='flex flex-col items-center gap-4 justify-center p-4'>
-					<Heading>Auth</Heading>
+					<Heading classNames='select-none'>Auth</Heading>
 
 					<div className='relative flex flex-col gap-3 w-full'>
 						<Input
-							{...register('email', { required: 'Email is missing!' })}
+							{...register('email', schemaEmail)}
 							placeholder='Enter your email'
 							id='email'
 							type='email'
 							autoComplete='on'
 							disabled={isPending}
+							aria-invalid={errors.email ? 'true' : 'false'}
 						/>
 
 						<Input
-							{...register('password', { required: 'Password is missing!' })}
+							{...register('password', schemaPassword)}
 							placeholder='Enter your password'
 							id='password'
 							type='password'
 							autoComplete='on'
 							disabled={isPending}
+							aria-invalid={errors.password ? 'true' : 'false'}
 						/>
+
+						<ErrorMessageTemplate name='email' errors={errors} />
+						<ErrorMessageTemplate name='password' errors={errors} />
 
 						{isPending && <Loader position='center' />}
 					</div>
@@ -90,3 +120,21 @@ export default function Auth() {
 		</div>
 	)
 }
+
+const ErrorMessageTemplate = ({
+	name,
+	errors,
+}: {
+	name: keyof AuthForm
+	errors: FieldErrors<AuthForm>
+}) => (
+	<ErrorMessage
+		errors={errors}
+		name={name}
+		render={({ message }) => (
+			<div className='mt-2 text-xs text-red-600 p-1 bg-red-50 border-l-4 border-red-500 rounded-md'>
+				<span>{message}</span>
+			</div>
+		)}
+	/>
+)
