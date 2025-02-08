@@ -107,9 +107,9 @@ export default function KanbanColumn({
 			{...attributes}
 			{...listeners}
 		>
-			<div className={cn('mb-4 p-2', isDragging && 'opacity-50')}>
-				<div className='flex items-center justify-between border-b-2 border-border mb-2'>
-					<h2 className='text-xl text-ellipsis max-w-[75%] overflow-hidden'>
+			<div className={cn('mb-4 p-2 h-[calc(100vh-100px)]', isDragging && 'opacity-50')}>
+				<div className='flex items-center justify-between border-2 border-border/50 rounded-2xl mb-2 p-0.5 px-2'>
+					<h2 className='text-sm text-ellipsis max-w-[75%] overflow-hidden'>
 						{label}
 					</h2>
 

@@ -1,5 +1,6 @@
 'use client'
 
+import TemplateOverlay from '@/components/TemplateOverlay'
 import DialogTemplate from '@/components/ui/dialog-template'
 import EllipseButton from '@/components/ui/ellipse-button'
 import Loader from '@/components/ui/loader'
@@ -7,6 +8,7 @@ import { HEIGHT } from '@/constants/height-elements.constants'
 import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { columnService } from '@/services/column.service'
 import { taskService } from '@/services/task.service'
+import { Column } from '@/types/column.types'
 import { OrderItemsDto } from '@/types/orderItemsDto'
 import { Task, TasksByColumn } from '@/types/task.types'
 import createOrderedItems from '@/utils/createOrderedItems'
@@ -35,7 +37,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useColumns } from '../hooks/useColumns'
 import { useTasks } from '../hooks/useTasks'
-import KanbanCard from './KanbanCard'
 import KanbanColumn from './KanbanColumn'
 
 const KanbanView = React.memo(
@@ -45,6 +46,7 @@ const KanbanView = React.memo(
 		const { tasks: data } = useTasks()
 		const [tasks, setTasks] = useState<TasksByColumn>({})
 		const [activeTask, setActiveTask] = useState<Task | null>(null)
+		const [activeColumn, setActiveColumn] = useState<Column | null>(null)
 		const [isExistingTempTask, setIsExistingTempTask] = useState<boolean>(false)
 
 		const debouncedUpdateTasksRef = useRef(
@@ -189,6 +191,11 @@ const KanbanView = React.memo(
 				setActiveTask(event.active.data.current.task)
 				return
 			}
+
+			if (event.active.data.current?.type === 'Column') {
+				setActiveColumn(event.active.data.current.column)
+				return
+			}
 		}
 
 		function onDragOver(event: DragOverEvent) {
@@ -311,6 +318,7 @@ const KanbanView = React.memo(
 
 		function onDragEnd(event: DragEndEvent) {
 			setActiveTask(null)
+			setActiveColumn(null)
 			const { active, over } = event
 
 			if (!over) return
@@ -412,17 +420,14 @@ const KanbanView = React.memo(
 
 					{createPortal(
 						<DragOverlay>
-							{activeTask && (
-								<KanbanCard /// TODO: create a CardOverlay component
-									id={activeTask.id}
-									task={activeTask}
-									onDeleteTask={onDeleteTask}
-									isExistingTempTask={false}
-									setIsExistingTempTask={function (value: boolean): void {
-										throw new Error('Function not implemented.')
-									}}
+							{activeTask ? (
+								<TemplateOverlay task={activeTask} />
+							) : activeColumn ? (
+								<TemplateOverlay
+									column={activeColumn}
+									tasks={tasks[activeColumn.id]}
 								/>
-							)}
+							) : null}
 						</DragOverlay>,
 						document.body
 					)}
