@@ -105,6 +105,19 @@ const KanbanCard = memo(
 			}, duration)
 		}
 
+		const handleCreateTask = () => {
+			setIsExistingTempTask(false)
+
+			createTask({
+				title,
+				isCompleted,
+				columnId: task.columnId,
+				order: task.order,
+				description,
+				priority: (priority as TaskPriority) || undefined,
+			})
+		}
+
 		useEffect(() => {
 			const handleUnload = () => {
 				if (isDeletedTask) {
@@ -220,6 +233,7 @@ const KanbanCard = memo(
 						createTask={createTask}
 						deleteTask={deleteTask}
 						setIsExistingTempTask={setIsExistingTempTask}
+						handleCreateTask={handleCreateTask}
 					/>
 				</motion.div>
 
@@ -280,6 +294,7 @@ const KanbanCardContent = memo(
 		createTask,
 		deleteTask,
 		setIsExistingTempTask,
+		handleCreateTask,
 	}: {
 		task: Task
 		title: string
@@ -301,6 +316,7 @@ const KanbanCardContent = memo(
 		>
 		deleteTask: (id: string) => void
 		setIsExistingTempTask: (value: boolean) => void
+		handleCreateTask: () => void
 	}) => {
 		const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -309,7 +325,7 @@ const KanbanCardContent = memo(
 				inputRef.current.focus()
 			}
 		}, [createdAt])
-		
+
 		return (
 			<>
 				<button
@@ -356,6 +372,11 @@ const KanbanCardContent = memo(
 										disabled={isCompleted}
 										value={title}
 										onChange={e => setTitle(e.target.value)}
+										onKeyDown={e => {
+											if (e.key === 'Enter' && !createdAt) {
+												handleCreateTask()
+											}
+										}}
 									/>
 								</TooltipTrigger>
 								{!!title && (
@@ -368,25 +389,7 @@ const KanbanCardContent = memo(
 
 						{!createdAt && (
 							<CircleCheck
-								onClick={() => {
-									console.log({
-										title,
-										isCompleted,
-										columnId: task.columnId,
-										order: task.order,
-										description,
-										priority: (priority as TaskPriority) || undefined,
-									})
-									setIsExistingTempTask(false)
-									createTask({
-										title,
-										isCompleted,
-										columnId: task.columnId,
-										order: task.order,
-										description,
-										priority: (priority as TaskPriority) || undefined,
-									})
-								}}
+								onClick={handleCreateTask}
 								className={cn(
 									'hover:text-green-500 transition-colors',
 									'w-6 h-6',
