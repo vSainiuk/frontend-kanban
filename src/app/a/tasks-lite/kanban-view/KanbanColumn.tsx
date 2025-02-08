@@ -187,12 +187,13 @@ export default function KanbanColumn({
 				{!isExistingTempTask && (
 					<KanbanAddNewCard
 						columnId={id}
+						classNames='w-full'
 						onClick={() => {
 							setIsExistingTempTask(true)
 							onAddTask(id)
 						}}
 					>
-						Add task...
+						+
 					</KanbanAddNewCard>
 				)}
 			</div>
