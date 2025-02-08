@@ -1,14 +1,6 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog'
+import DialogDeleteTemplate from '@/components/ui/dialog-delete-template'
 import DialogTemplate from '@/components/ui/dialog-template'
 import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { cn } from '@/lib/utils'
@@ -107,7 +99,12 @@ export default function KanbanColumn({
 			{...attributes}
 			{...listeners}
 		>
-			<div className={cn('mb-4 p-2 h-[calc(100vh-100px)]', isDragging && 'opacity-50')}>
+			<div
+				className={cn(
+					'mb-4 p-2 h-[calc(100vh-100px)]',
+					isDragging && 'opacity-50'
+				)}
+			>
 				<div className='flex items-center justify-between border-2 border-border/50 rounded-2xl mb-2 p-0.5 px-2'>
 					<h2 className='text-sm text-ellipsis max-w-[75%] overflow-hidden'>
 						{label}
@@ -133,30 +130,13 @@ export default function KanbanColumn({
 						</button>
 
 						{tasks.length > 0 ? (
-							<Dialog>
-								<DialogTrigger asChild>
-									<Trash2 className='w-4 h-4 transition-colors text-muted hover:text-destructive' />
-								</DialogTrigger>
-								<DialogContent
-									aria-describedby='modal-content'
-									className='sm:max-w-[425px]'
-								>
-									<DialogHeader>
-										<DialogTitle>Are you sure?</DialogTitle>
-									</DialogHeader>
-									<DialogDescription>
-										Are you sure you want to delete this column? All tasks in
-										this column will be deleted permanently.
-									</DialogDescription>
-
-									<Button
-										variant='destructive'
-										onClick={() => onDeleteColumn(id)}
-									>
-										Delete
-									</Button>
-								</DialogContent>
-							</Dialog>
+							<DialogDeleteTemplate
+								description='Are you sure you want to delete this column? All tasks in this column
+								will be deleted permanently.'
+								onClick={() => onDeleteColumn(id)}
+							>
+								<Trash2 className='w-4 h-4 transition-colors text-muted hover:text-destructive' />
+							</DialogDeleteTemplate>
 						) : (
 							<Trash2
 								onClick={() => onDeleteColumn(id)}

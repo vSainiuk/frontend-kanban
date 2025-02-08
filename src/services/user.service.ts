@@ -1,5 +1,5 @@
 import { axiosWithAuth } from '@/api/interceptors'
-import { TypeUserForm } from '@/types/auth.types'
+import { TypeUserForm, TypeUserPatchForm } from '@/types/auth.types'
 import { User } from '@/types/user.types'
 
 interface ProfileResponse {
@@ -22,6 +22,11 @@ class UserService {
 
 	async updateProfile(data: TypeUserForm) {
 		const response = await axiosWithAuth.put(this.BASE_URL, data)
+		return response.data
+	}
+
+	async updatePatchProfile(data: TypeUserPatchForm) {
+		const response = await axiosWithAuth.patch(this.BASE_URL, data)
 		return response.data
 	}
 }

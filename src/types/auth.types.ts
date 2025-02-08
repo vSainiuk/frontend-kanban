@@ -11,3 +11,4 @@ export interface AuthResponse {
 }
 
 export type TypeUserForm = Omit<User, 'id'> & { password?: string; }
+export type TypeUserPatchForm = Partial<User>

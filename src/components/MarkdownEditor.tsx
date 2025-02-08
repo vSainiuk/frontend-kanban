@@ -1,12 +1,13 @@
 'use client'
 
-import { axiosWithAuth } from '@/api/interceptors'
+import { saveImageToS3 } from '@/utils/sendImageToS3'
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css'
 import '@toast-ui/editor/dist/toastui-editor.css'
 
 import { Editor } from '@toast-ui/react-editor'
 import debounce from 'lodash.debounce'
 import { useCallback, useRef } from 'react'
+import { toast } from 'sonner'
 
 interface MarkdownEditorProps {
 	title: string
@@ -43,20 +44,13 @@ export default function MarkdownEditor({
 		callback: (url: string, altText?: string) => void
 	) => {
 		try {
-			const formData = new FormData()
-			formData.append('file', blob)
-
-			const response = await axiosWithAuth.post('/upload', formData, {
-				headers: {
-					'Content-Type': 'multipart/form-data',
-				},
-			})
+			const response = await saveImageToS3(blob)
 
 			if (response.data.url) {
 				callback(response.data.url, blob.name)
 			}
 		} catch (error) {
-			console.error('Image upload failed:', error)
+			toast.error('Failed to upload image. Please send an image.')
 		}
 	}
 

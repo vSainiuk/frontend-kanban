@@ -20,7 +20,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 	return (
 		<aside
 			ref={sidebarRef}
-			className={`border-t-2 sm:border-r-2 sm:border-t-0 bg-sidebar/90 border-primary fixed bottom-0 left-0 right-0 sm:static transition-all duration-700`}
+			className={`border-t-2 sm:border-r-2 sm:border-t-0 bg-card border-primary fixed bottom-0 left-0 right-0 sm:static transition-all duration-700`}
 		>
 			<nav
 				className={cn(

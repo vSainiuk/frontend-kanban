@@ -5,6 +5,7 @@ export interface User extends Root {
 	email: string,
 	password: string,
 	role: UserRole,
+	backgroundImageUrl?: string
 };
 
 export enum UserRole {
