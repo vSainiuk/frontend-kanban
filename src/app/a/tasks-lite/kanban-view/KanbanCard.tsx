@@ -80,7 +80,7 @@ const KanbanCard = memo(
 						variant='ghost'
 						className='ml-4'
 						onClick={() => {
-							setIsExistingTempTask(true)
+							if (!createdAt) setIsExistingTempTask(true)
 							setIsDeletedTask(false)
 							if (deleteTimeoutRef.current) {
 								clearTimeout(deleteTimeoutRef.current)
@@ -172,8 +172,6 @@ const KanbanCard = memo(
 			transform: CSS.Transform.toString(transform),
 			transition,
 		}
-
-		const [isDateChanged, setIsDateChanged] = useState<boolean>(false)
 
 		if (isDragging) {
 			return (
