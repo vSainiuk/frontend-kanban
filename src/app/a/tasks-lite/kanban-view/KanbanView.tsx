@@ -414,7 +414,7 @@ const KanbanView = React.memo(
 									value: columnName,
 									onChange: setColumnName,
 								}}
-							/>
+							/>		
 						</EllipseButton>
 					</SortableContext>
 

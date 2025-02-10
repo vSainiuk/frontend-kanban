@@ -2,6 +2,7 @@
 
 import MarkdownEditor from '@/components/MarkdownEditor'
 import PrioritySelect from '@/components/PrioritySelect'
+import BookOpenIcon from '@/components/ui/book-open-icon'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -29,7 +30,13 @@ import { CSS } from '@dnd-kit/utilities'
 import { UseMutateFunction } from '@tanstack/react-query'
 import { AxiosResponse } from 'axios'
 import { motion } from 'framer-motion'
-import { BookOpen, CircleCheck, GripVertical, Trash2 } from 'lucide-react'
+import {
+	BookOpen,
+	BookOpenText,
+	CircleCheck,
+	GripVertical,
+	Trash2,
+} from 'lucide-react'
 import { memo, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useCreateTask } from '../hooks/useCreateTask'
@@ -241,9 +248,10 @@ const KanbanCard = memo(
 						}}
 					>
 						<DialogTrigger asChild>
-							<BookOpen
+							<BookOpenIcon
 								onClick={() => setIsOpenMarkdownDialog(!isOpenMarkdownDialog)}
 								className='w-4 h-4 absolute top-2 right-2 text-muted hover:text-white'
+								Component={description ? BookOpenText : BookOpen}
 							/>
 						</DialogTrigger>
 						<DialogContent

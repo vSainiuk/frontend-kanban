@@ -15,7 +15,7 @@ export default function EllipseButton({
 	return (
 		<div className='relative w-fit ml-auto'>
 			<motion.div
-				className='absolute right-0 top-0 bottom-0 bg-card text-white cursor-pointer flex items-center justify-center'
+				className='absolute right-0 top-0 bottom-0 bg-card/75 text-white cursor-pointer flex items-center justify-center'
 				initial={{ width: '30px' }}
 				animate={{ width: isHovered ? '80px' : '30px' }}
 				transition={{ duration: 0.15, ease: 'easeOut' }}
