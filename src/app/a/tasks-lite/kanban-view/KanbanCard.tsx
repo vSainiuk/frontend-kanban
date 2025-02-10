@@ -374,8 +374,13 @@ const KanbanCardContent = memo(
 									/>
 								</TooltipTrigger>
 								{!!title && (
-									<TooltipContent alignOffset={400}>
-										<p>{title}</p>
+									<TooltipContent
+										className='bg-background text-white px-4 py-2 rounded-xl shadow-lg border border-border
+              			max-w-[300px] text-sm leading-tight tracking-wide'
+										alignOffset={400}
+										onMouseDown={e => e.stopPropagation()}
+									>
+										<p className='whitespace-normal break-words'>{title}</p>
 									</TooltipContent>
 								)}
 							</Tooltip>
