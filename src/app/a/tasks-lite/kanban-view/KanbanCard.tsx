@@ -250,7 +250,12 @@ const KanbanCard = memo(
 						<DialogTrigger asChild>
 							<BookOpenIcon
 								onClick={() => setIsOpenMarkdownDialog(!isOpenMarkdownDialog)}
-								className='w-4 h-4 absolute top-2 right-2 text-muted hover:text-white'
+								className={cn(
+									'w-5 h-5 absolute top-2 right-2 ',
+									description
+										? 'text-white hover:text-muted'
+										: 'text-muted hover:text-white'
+								)}
 								Component={description ? BookOpenText : BookOpen}
 							/>
 						</DialogTrigger>
@@ -331,10 +336,10 @@ const KanbanCardContent = memo(
 		return (
 			<>
 				<button
-					className='group absolute right-2 bottom-2 p-1'
+					className='group absolute right-2 bottom-2'
 					onClick={() => handleDeleteTask(task)}
 				>
-					<Trash2 className='w-4 h-4 transition-colors text-muted group-hover:text-destructive' />
+					<Trash2 className='w-5 h-5 transition-colors text-muted group-hover:text-destructive' />
 				</button>
 
 				<div className={cn(`flex flex-col gap-1`, isCompleted && 'text-muted')}>
