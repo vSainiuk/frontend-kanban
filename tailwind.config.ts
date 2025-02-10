@@ -13,6 +13,7 @@ const config: Config = {
   	extend: {
 			fontFamily: {
         'cursive': ['var(--allura-font)', 'cursive'],
+        'label': ['var(--label-font)', 'sans-serif'],
       },
   		colors: COLORS,
   		borderRadius: {

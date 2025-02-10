@@ -105,8 +105,8 @@ export default function KanbanColumn({
 					isDragging && 'opacity-50'
 				)}
 			>
-				<div className='flex items-center justify-between border-2 border-border/50 rounded-2xl mb-2 p-0.5 px-2'>
-					<h2 className='text-sm text-ellipsis max-w-[75%] overflow-hidden'>
+				<div className='flex items-center justify-between border-2 border-border/50 rounded-2xl mb-2 p-0.5 px-2 bg-white/10 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl'>
+					<h2 className='font-label text-ellipsis max-w-[75%] overflow-hidden'>
 						{label}
 					</h2>
 
@@ -122,7 +122,7 @@ export default function KanbanColumn({
 								onChange: setNewEditColumnName,
 							}}
 						>
-							<Edit2 className='w-4 h-4 transition-colors text-muted hover:text-white' />
+							<Edit2 className='w-4 h-4 transition-colors hover:text-muted text-white' />
 						</DialogTemplate>
 
 						<button className='w-fit' aria-describedby='todo-item'>
@@ -135,7 +135,7 @@ export default function KanbanColumn({
 								will be deleted permanently.'
 								onClick={() => onDeleteColumn(id)}
 							>
-								<Trash2 className='w-4 h-4 transition-colors text-muted hover:text-destructive' />
+								<Trash2 className='w-4 h-4 transition-colors text-white hover:text-destructive' />
 							</DialogDeleteTemplate>
 						) : (
 							<Trash2

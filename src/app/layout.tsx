@@ -1,6 +1,6 @@
 import { SITE_NAME } from '@/constants/seo.constants'
 import type { Metadata } from 'next'
-import { Allura, Noto_Sans } from 'next/font/google'
+import { Allura, Noto_Sans, Barlow as labelFont } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './custom-styles/loader-circle.scss'
 import './custom-styles/scrollbar-styles.scss'
@@ -24,6 +24,13 @@ const allura = Allura({
 	variable: '--allura-font',
 })
 
+const label = labelFont({
+	subsets: ['latin'],
+	display: 'swap',
+	weight: '400', 
+	variable: '--label-font',
+})
+
 export const metadata: Metadata = {
 	title: {
 		default: SITE_NAME,
@@ -38,7 +45,7 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang='en' className={`${allura.variable}`}>
+		<html lang='en' className={`${allura.variable} ${label.variable}`}>
 			<body className={`${fontFamily.className} antialiased`}>
 				<Providers>
 					{children}

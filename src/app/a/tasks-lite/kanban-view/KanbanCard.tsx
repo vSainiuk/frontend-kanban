@@ -183,11 +183,9 @@ const KanbanCard = memo(
 						{...attributes}
 						className={cn(
 							'h-full w-full border border-purple-700/50',
-							'grid grid-cols-[auto_30px] items-center gap-1 rounded-2xl p-4 shadow-md transition-shadow relative',
+							'grid grid-cols-[auto_30px] items-center gap-1 rounded-2xl p-4 shadow-md transition-shadow relative bg-card/75',
 							isDragging ? 'opacity-50' : '',
-							isCompleted
-								? 'bg-green-500/10 opacity-75'
-								: 'bg-card hover:shadow-lg'
+							isCompleted ? '' : ''
 						)}
 					></motion.div>
 				</div>
@@ -208,11 +206,9 @@ const KanbanCard = memo(
 					exit={{ opacity: 0, y: 50 }}
 					transition={{ duration: 0.5, ease: 'easeOut' }}
 					className={cn(
-						'grid grid-cols-[auto_30px] items-center gap-1 rounded-2xl p-4 shadow-md transition-shadow relative',
+						'grid grid-cols-[auto_30px] items-center gap-1 rounded-2xl p-4 shadow-lg transition-shadow relative bg-card/75',
 						isDragging && 'opacity-50',
-						isCompleted
-							? 'bg-green-500/10 opacity-75'
-							: 'bg-card hover:shadow-lg'
+						isCompleted ? '' : ''
 					)}
 				>
 					<KanbanCardContent
