@@ -62,8 +62,8 @@ export default function MarkdownEditor({
 				theme='dark'
 				initialEditType={'wysiwyg'}
 				previewStyle='vertical'
-				initialValue={description ? description : title ? title : ' '}
-				value={description ? description : title ? title : ' '}
+				initialValue={description ? description : ' '}
+				value={description ? description : ' '}
 				placeholder='Write something...'
 				onChange={isCompletedTask ? undefined : handleContentChange}
 				usageStatistics={false}
