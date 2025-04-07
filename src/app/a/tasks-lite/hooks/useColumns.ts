@@ -3,10 +3,10 @@ import { Column } from '@/types/column.types'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-export function useColumns() {
-	const { data } = useQuery({
+export function useColumns(slug: string) {
+	const { data, isLoading } = useQuery({
 		queryKey: ['columns'],
-		queryFn: () => columnService.getColumns(),
+		queryFn: () => columnService.getColumns(slug),
 	})
 
 	const [columns, setColumns] = useState<Column[] | undefined>(data?.data)
@@ -15,5 +15,5 @@ export function useColumns() {
 		setColumns(data?.data)
 	}, [data?.data])
 
-	return { columns, setColumns }
+	return { columns, setColumns, isLoading }
 }

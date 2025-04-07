@@ -22,7 +22,9 @@ export default function MenuItem({
 	isLogout,
 }: MenuItemProps) {
 	const pathname = usePathname()
-	const isActive = pathname === menu.link
+	const isActive = pathname === menu.link 
+	const isKanbanBoards = pathname.includes('tasks-lite')
+	const isTasksLiteActive = isKanbanBoards && menu.link.includes('tasks-lite')
 
 	const handleLogout = async (
 		event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
@@ -39,7 +41,7 @@ export default function MenuItem({
 	return (
 		<li
 			className={`relative flex items-center transition-colors rounded-xl ${
-				isActive ? 'bg-purple-700' : 'hover:bg-slate-400/25'
+				isActive || isTasksLiteActive ? 'bg-purple-700' : 'hover:bg-accent'
 			}`}
 		>
 			<Link

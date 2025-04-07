@@ -4,7 +4,6 @@ import TemplateOverlay from '@/components/TemplateOverlay'
 import DialogTemplate from '@/components/ui/dialog-template'
 import EllipseButton from '@/components/ui/ellipse-button'
 import Loader from '@/components/ui/loader'
-import { HEIGHT } from '@/constants/height-elements.constants'
 import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { columnService } from '@/services/column.service'
 import { taskService } from '@/services/task.service'
@@ -36,18 +35,22 @@ import debounce from 'lodash.debounce'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useColumns } from '../hooks/useColumns'
-import { useTasks } from '../hooks/useTasks'
 import KanbanColumn from './KanbanColumn'
+import { useKanbanBoard } from '../hooks/useKanbanBoard'
 
 const KanbanView = React.memo(
-	function KanbanView() {
+	function KanbanView({ slug }: { slug: string }) {
 		const { disabledDrag } = useDndNoDragContext()
-		const { columns, setColumns } = useColumns()
-		const { tasks: data } = useTasks()
+		const {
+			columns,
+			setColumns,
+			isLoading: isLoadingColumns,
+		} = useColumns(slug)
 		const [tasks, setTasks] = useState<TasksByColumn>({})
 		const [activeTask, setActiveTask] = useState<Task | null>(null)
 		const [activeColumn, setActiveColumn] = useState<Column | null>(null)
 		const [isExistingTempTask, setIsExistingTempTask] = useState<boolean>(false)
+		const { kanbanBoard } = useKanbanBoard(slug)
 
 		const debouncedUpdateTasksRef = useRef(
 			debounce((updatedTasks: OrderItemsDto[]) => {
@@ -56,18 +59,24 @@ const KanbanView = React.memo(
 		).current
 
 		useEffect(() => {
-			if (data) {
-				const groupedTasks = data.reduce((acc: TasksByColumn, task: Task) => {
-					if (!acc[task.columnId]) {
-						acc[task.columnId] = []
-					}
-					acc[task.columnId].push(task)
-					return acc
-				}, {})
+			if (slug) {
+				setColumns([])
+			}
+		}, [slug])
+
+		useEffect(() => {
+			if (columns) {
+				const groupedTasks = columns.reduce(
+					(acc: TasksByColumn, column: Column) => {
+						acc[column.id] = column.tasks || []
+						return acc
+					},
+					{}
+				)
 
 				setTasks(groupedTasks)
 			}
-		}, [data])
+		}, [columns])
 
 		const columnsIds = useMemo(
 			() => columns?.map(column => column.id),
@@ -114,9 +123,10 @@ const KanbanView = React.memo(
 		function onAddColumn() {
 			if (!columnName) return
 
-			const newColumn = {
+			const newColumn: Column = {
 				id: `column-${cuid()}`,
 				label: columnName,
+				boardId: kanbanBoard?.id as string,
 				order: columns ? columns.length : 0,
 				tasks: [],
 			}
@@ -358,16 +368,17 @@ const KanbanView = React.memo(
 		}
 		// DND HANDLERS Region end
 
-		if (!columns) return <Loader position='center' />
+		if (!columns || isLoadingColumns) return <Loader position='center' />
 
 		return (
 			<div
 				// ref={containerRef}
 				// onMouseMove={handleMouseMove}
 				// onMouseLeave={() => setIsHoveringScrollbar(false)}
-				className='grid gap-4 overflow-x-auto'
+				className='grid gap-2 overflow-x-auto pl-2'
 				style={{
-					height: `calc(100% - ${HEIGHT.switcher})`,
+					height: `100%`,
+					width: '100%',
 					gridAutoFlow: 'column',
 					gridTemplateColumns: `repeat(${columns.length}, 345px)`,
 					whiteSpace: 'nowrap',
@@ -414,7 +425,7 @@ const KanbanView = React.memo(
 									value: columnName,
 									onChange: setColumnName,
 								}}
-							/>		
+							/>
 						</EllipseButton>
 					</SortableContext>
 

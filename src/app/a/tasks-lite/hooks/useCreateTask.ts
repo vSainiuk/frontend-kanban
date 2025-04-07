@@ -10,7 +10,7 @@ export function useCreateTask() {
 		mutationFn: (data: TaskFormState) => taskService.createTask(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: ['tasks'],
+				queryKey: ['columns'],
 			})
 		},
 	})

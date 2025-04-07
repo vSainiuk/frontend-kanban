@@ -13,11 +13,6 @@ export const menuData: MenuItem[] = [
 		link: '/a/tasks-lite',
 	},
 	// {
-	// 	title: 'Color Picker',
-	// 	icon: Logs,
-	// 	link: '/a/color-picker',
-	// },
-	// {
 	// 	title: 'Timer',
 	// 	icon: Timer,
 	// 	link: '/a/timer',

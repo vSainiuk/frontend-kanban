@@ -34,7 +34,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
 				<button
 					className={cn(
-						`hidden sm:flex items-center justify-center z-20 transition-colors hover:bg-slate-400/25 rounded-xl p-1 ml-auto w-fit`,
+						`hidden sm:flex items-center justify-center z-20 transition-colors hover:bg-accent rounded-xl p-1 ml-auto w-fit`,
 						isCollapsed && 'static mt-1 ml-0'
 					)}
 				>

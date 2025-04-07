@@ -6,8 +6,10 @@ import { UniqueIdentifier } from '@dnd-kit/core'
 class ColumnService {
 	private BASE_URL = '/user/columns'
 
-	async getColumns() {
-		const response = await axiosWithAuth.get<Column[]>(this.BASE_URL)
+	async getColumns(slug: string) {
+		const response = await axiosWithAuth.get<Column[]>(this.BASE_URL, {
+			params: { slug },
+		})
 		return response
 	}
 

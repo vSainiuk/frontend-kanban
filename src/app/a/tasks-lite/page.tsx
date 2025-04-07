@@ -1,31 +1,20 @@
 'use client'
 
-import { HEIGHT } from '@/constants/height-elements.constants'
-import { DndNoDragProvider } from '@/contexts/DndNoDragContext'
-import { useProfile } from '@/hooks/useProfile'
-import dynamic from 'next/dynamic'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useKanbanBoards } from '@/app/a/tasks-lite/hooks/useKanbanBoards'
 
-const KanbanView = dynamic(() => import('./kanban-view/KanbanView'), {
-	ssr: false,
-})
+export default function TasksLiteRedirectPage() {
+	const router = useRouter()
+	const { kanbanBoards, isPending } = useKanbanBoards()
 
-export default function TasksPage() {
-	const { data } = useProfile()
-	const backgroundImageUrl = data?.user?.backgroundImageUrl
+	useEffect(() => {
+		if (isPending) return
 
-	return (
-		<div
-			className='pl-5 bg-cover bg-center bg-no-repeat'
-			style={{
-				height: `calc(100% - ${HEIGHT.header})`,
-				backgroundImage: backgroundImageUrl
-					? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImageUrl})`
-					: '',
-			}}
-		>
-			<DndNoDragProvider>
-				<KanbanView />
-			</DndNoDragProvider>
-		</div>
-	)
+		if (kanbanBoards && kanbanBoards.length > 0) {
+			router.replace(`/a/tasks-lite/${kanbanBoards[0].slug}`)
+		}
+	}, [kanbanBoards, isPending])
+
+	return null
 }
