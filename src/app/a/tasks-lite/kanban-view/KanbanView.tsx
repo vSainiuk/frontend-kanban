@@ -37,6 +37,7 @@ import { createPortal } from 'react-dom'
 import { useColumns } from '../hooks/useColumns'
 import KanbanColumn from './KanbanColumn'
 import { useKanbanBoard } from '../hooks/useKanbanBoard'
+import { WIDTH_CARD } from '@/constants/width-card'
 
 const KanbanView = React.memo(
 	function KanbanView({ slug }: { slug: string }) {
@@ -380,7 +381,7 @@ const KanbanView = React.memo(
 					height: `100%`,
 					width: '100%',
 					gridAutoFlow: 'column',
-					gridTemplateColumns: `repeat(${columns.length}, 345px)`,
+					gridTemplateColumns: `repeat(${columns.length}, ${WIDTH_CARD})`,
 					whiteSpace: 'nowrap',
 				}}
 			>
