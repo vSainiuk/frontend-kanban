@@ -1,1 +1,0 @@
-export const WIDTH_CARD = '325px'

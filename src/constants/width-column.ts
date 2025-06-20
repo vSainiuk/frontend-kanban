@@ -1,0 +1,1 @@
+export const WIDTH_COLUMN = '325px'

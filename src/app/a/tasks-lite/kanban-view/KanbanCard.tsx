@@ -182,7 +182,7 @@ const KanbanCard = memo(
 
 		if (isDragging) {
 			return (
-				<div className='relative w-[330px] h-[100px]'>
+				<div className='relative w-[325px] h-[100px]'>
 					<motion.div
 						style={style}
 						ref={setNodeRef}
