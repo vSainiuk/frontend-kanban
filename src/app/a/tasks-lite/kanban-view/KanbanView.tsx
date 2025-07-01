@@ -3,7 +3,7 @@
 import TemplateOverlay from '@/components/TemplateOverlay'
 import DialogTemplate from '@/components/ui/dialog-template'
 import EllipseButton from '@/components/ui/ellipse-button'
-import Loader from '@/components/ui/loader'
+import { WIDTH_COLUMN } from '@/constants/width-column'
 import { useDndNoDragContext } from '@/contexts/DndNoDragContext'
 import { columnService } from '@/services/column.service'
 import { taskService } from '@/services/task.service'
@@ -35,9 +35,9 @@ import debounce from 'lodash.debounce'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useColumns } from '../hooks/useColumns'
-import KanbanColumn from './KanbanColumn'
 import { useKanbanBoard } from '../hooks/useKanbanBoard'
-import { WIDTH_COLUMN } from '@/constants/width-column'
+import KanbanColumn from './KanbanColumn'
+import KanbanSkeleton from './KanbanSkeleton'
 
 const KanbanView = React.memo(
 	function KanbanView({ slug }: { slug: string }) {
@@ -66,7 +66,7 @@ const KanbanView = React.memo(
 		}, [slug])
 
 		useEffect(() => {
-			if (columns) {
+			if (columns?.length) {
 				const groupedTasks = columns.reduce(
 					(acc: TasksByColumn, column: Column) => {
 						acc[column.id] = column.tasks || []
@@ -369,7 +369,7 @@ const KanbanView = React.memo(
 		}
 		// DND HANDLERS Region end
 
-		if (!columns || isLoadingColumns) return <Loader position='center' />
+		if (!columns?.length || isLoadingColumns) return <KanbanSkeleton />
 
 		return (
 			<div

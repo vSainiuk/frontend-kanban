@@ -2,7 +2,6 @@
 
 import { useSwipeToToggleSidebar } from '@/hooks/useSwipeToToggleSidebar'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
 import { Menu, SquareChevronLeft } from 'lucide-react'
 import { menuData } from './menu.data'
 import MenuItem from './MenuItem'
@@ -44,16 +43,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 							onClick={() => setIsCollapsed(false)}
 						/>
 					) : (
-						<motion.div
-							initial={{ rotate: -90 }}
-							animate={{ rotate: 0 }}
-							transition={{ duration: 0.5, ease: 'easeInOut' }}
-						>
-							<SquareChevronLeft
-								className={cn(toggleIconClasses)}
-								onClick={() => setIsCollapsed(true)}
-							/>
-						</motion.div>
+						<SquareChevronLeft
+							className={cn(toggleIconClasses)}
+							onClick={() => setIsCollapsed(true)}
+						/>
 					)}
 				</button>
 
@@ -61,7 +54,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 					{menuData.map((menu, index) => {
 						const isLogout = menu.title === 'Log Out'
 						return (
-							<MenuItem isLogout={isLogout} menu={menu} key={index} isCollapsed={isCollapsed} />
+							<MenuItem
+								isLogout={isLogout}
+								menu={menu}
+								key={index}
+								isCollapsed={isCollapsed}
+							/>
 						)
 					})}
 				</ul>
